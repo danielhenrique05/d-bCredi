@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import Imoveis from './components/Imoveis';
 import ImovelDetalhes from './components/ImovelDetalhes';
 import AdminCartas from './admin/AdminCartas';
+import AdminImoveis from './admin/AdminImoveis'; // <-- Importação do novo painel de Imóveis
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
@@ -91,6 +92,7 @@ const AdminDashboardHome = () => {
     </div>
   );
 };
+
 function App() {
   return (
     <Suspense
@@ -113,6 +115,9 @@ function App() {
           
           {/* Nossa nova rota para gerenciar as Cartas */}
           <Route path="/admin/cartas" element={<AdminCartas />} />
+          
+          {/* Nossa nova rota para gerenciar os Imóveis */}
+          <Route path="/admin/imoveis" element={<AdminImoveis />} />
         </Route>
         
         {/* Fallback para páginas não encontradas */}

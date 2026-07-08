@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard, Building } from 'lucide-react';
 import { Navigate, Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';
@@ -135,6 +135,18 @@ const AdminLayout = () => {
           >
             <CreditCard className="h-4 w-4" />
             Cartas Contempladas
+          </Link>
+
+          <Link
+            to="/admin/imoveis"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+              location.pathname === '/admin/imoveis'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            <Building className="h-4 w-4" />
+            Imóveis
           </Link>
         </nav>
         <Outlet />
