@@ -10,6 +10,7 @@ import Cartas from './components/Cartas';
 import Footer from './components/Footer';
 import Imoveis from './components/Imoveis';
 import ImovelDetalhes from './components/ImovelDetalhes';
+import AdminCartas from './admin/AdminCartas';
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
@@ -90,7 +91,6 @@ const AdminDashboardHome = () => {
     </div>
   );
 };
-
 function App() {
   return (
     <Suspense
@@ -101,11 +101,21 @@ function App() {
       }
     >
       <Routes>
+        {/* Rotas Públicas */}
         <Route path="/" element={<PublicSite />} />
+        
+        {/* Login do Admin */}
         <Route path="/admin" element={<AdminLogin />} />
+        
+        {/* Rotas Protegidas do Painel Admin */}
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboardHome />} />
+          
+          {/* Nossa nova rota para gerenciar as Cartas */}
+          <Route path="/admin/cartas" element={<AdminCartas />} />
         </Route>
+        
+        {/* Fallback para páginas não encontradas */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

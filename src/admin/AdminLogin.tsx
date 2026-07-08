@@ -3,7 +3,7 @@ import { AlertCircle, Loader2, LockKeyhole, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';
 
-const AdminLogin = () => {
+  const AdminLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
