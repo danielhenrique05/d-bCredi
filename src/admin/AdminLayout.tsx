@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Loader2, LogOut, ShieldCheck } from 'lucide-react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard } from 'lucide-react';
+import { Navigate, Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,7 +52,7 @@ const AdminLayout = () => {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 px-4">
         <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/15 px-5 py-4 text-sm text-white backdrop-blur">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Carregando area administrativa...
+          Carregando área administrativa...
         </div>
       </div>
     );
@@ -79,7 +80,7 @@ const AdminLayout = () => {
 
           <div className="flex items-center gap-3">
             <div className="hidden rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-right sm:block">
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-500">Usuario</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-blue-500">Usuário</p>
               <p className="text-sm font-medium text-gray-700">{session.user.email}</p>
             </div>
 
@@ -102,14 +103,40 @@ const AdminLayout = () => {
               <LayoutDashboard className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Gestao administrativa</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Gestão administrativa</h2>
               <p className="mt-2 max-w-2xl text-sm text-blue-100">
-                Seu acesso foi validado. Use este layout para proteger paginas internas e manter a navegacao administrativa consistente.
+                Seu acesso foi validado. Use este menu para navegar entre os módulos do sistema.
               </p>
             </div>
           </div>
         </section>
 
+        {/* MENU DE NAVEGAÇÃO DO ADMIN */}
+        <nav className="mb-8 flex flex-wrap gap-2 border-b border-gray-200 pb-4">
+          <Link
+            to="/admin/dashboard"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+              location.pathname === '/admin/dashboard'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Início
+          </Link>
+          
+          <Link
+            to="/admin/cartas"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+              location.pathname === '/admin/cartas'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            <CreditCard className="h-4 w-4" />
+            Cartas Contempladas
+          </Link>
+        </nav>
         <Outlet />
       </main>
     </div>
