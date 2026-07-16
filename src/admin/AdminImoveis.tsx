@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, X, MapPin, Image as ImageIcon, Star, Building } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, X, MapPin, Image as ImageIcon, Star, Loader2 } from 'lucide-react';
+import { getSupabaseClient } from '../lib/supabase';
+
+const supabase = getSupabaseClient()
 
 interface Imovel {
-  id: number;
+  id: string; // Mudou para string (UUID do Supabase)
   titulo: string;
   tipo: 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial';
   preco: number;
@@ -14,35 +17,19 @@ interface Imovel {
   area: number;
   descricao: string;
   destaque: boolean;
-  imagens: string[];
+  imagens: string[]; // URLs reais salvas no banco
 }
-
-const dadosIniciais: Imovel[] = [
-  {
-    id: 1,
-    titulo: 'Casa de Alto Padrão no Centro',
-    tipo: 'Casa',
-    preco: 850000,
-    cidade: 'Concórdia',
-    bairro: 'Centro',
-    quartos: 3,
-    banheiros: 2,
-    vagas: 2,
-    area: 180,
-    descricao: 'Linda casa com acabamento premium, área de festas e piscina.',
-    destaque: true,
-    imagens: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80']
-  }
-];
 
 const formatarMoeda = (valor: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 };
 
 const AdminImoveis = () => {
-  const [imoveis, setImoveis] = useState<Imovel[]>(dadosIniciais);
+  const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imovelEditando, setImovelEditando] = useState<Imovel | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState<Omit<Imovel, 'id'>>({
     titulo: '',
@@ -59,6 +46,26 @@ const AdminImoveis = () => {
     imagens: []
   });
 
+  // 1. CARREGAR IMÓVEIS DO SUPABASE AO ABRIR A PÁGINA
+  const carregarImoveis = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('imoveis')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    if (error) {
+      alert('Erro ao carregar imóveis: ' + error.message);
+    } else if (data) {
+      setImoveis(data as Imovel[]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    carregarImoveis();
+  }, []);
+
   const handleNovo = () => {
     setImovelEditando(null);
     setFormData({
@@ -74,21 +81,66 @@ const AdminImoveis = () => {
     setIsModalOpen(true);
   };
 
-  const handleExcluir = (id: number) => {
+  // 2. EXCLUIR IMÓVEL NO SUPABASE
+  const handleExcluir = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este imóvel?')) {
-      setImoveis(imoveis.filter(i => i.id !== id));
+      const { error } = await supabase
+        .from('imoveis')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Erro ao deletar: ' + error.message);
+      } else {
+        setImoveis(imoveis.filter(i => i.id !== id));
+      }
     }
   };
 
-  const handleToggleDestaque = (id: number) => {
-    setImoveis(imoveis.map(i => i.id === id ? { ...i, destaque: !i.destaque } : i));
+  // 3. ALTERAR DESTAQUE NO SUPABASE
+  const handleToggleDestaque = async (imovel: Imovel) => {
+    const { error } = await supabase
+      .from('imoveis')
+      .update({ destaque: !imovel.destaque })
+      .eq('id', imovel.id);
+
+    if (error) {
+      alert('Erro ao atualizar destaque: ' + error.message);
+    } else {
+      setImoveis(imoveis.map(i => i.id === imovel.id ? { ...i, destaque: !i.destaque } : i));
+    }
   };
 
-  // Função para simular o upload de fotos no Front-end
-  const handleUploadFotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 4. UPLOAD REAL DE FOTOS NO STORAGE DO SUPABASE
+  const handleUploadFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const novasFotos = Array.from(e.target.files).map(file => URL.createObjectURL(file));
-      setFormData({ ...formData, imagens: [...formData.imagens, ...novasFotos] });
+      setUploading(true);
+      const arquivos = Array.from(e.target.files);
+      const novasUrls: string[] = [];
+
+      for (const file of arquivos) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const filePath = `imoveis/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('fotos-imoveis') // Seu Bucket do Supabase
+          .upload(filePath, file);
+
+        if (uploadError) {
+          alert(`Erro no upload da foto ${file.name}: ${uploadError.message}`);
+          continue;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('fotos-imoveis')
+          .getPublicUrl(filePath);
+
+        novasUrls.push(publicUrlData.publicUrl);
+      }
+
+      setFormData(prev => ({ ...prev, imagens: [...prev.imagens, ...novasUrls] }));
+      setUploading(false);
     }
   };
 
@@ -98,15 +150,38 @@ const AdminImoveis = () => {
     setFormData({ ...formData, imagens: novasImagens });
   };
 
-  const handleSalvar = (e: React.FormEvent) => {
+  // 5. SALVAR OU EDITAR NO SUPABASE
+  const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     if (imovelEditando) {
-      setImoveis(imoveis.map(i => i.id === imovelEditando.id ? { ...formData, id: i.id } as Imovel : i));
+      // Atualização (UPDATE)
+      const { error } = await supabase
+        .from('imoveis')
+        .update(formData)
+        .eq('id', imovelEditando.id);
+
+      if (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      } else {
+        setIsModalOpen(false);
+        carregarImoveis();
+      }
     } else {
-      const novoImovel = { ...formData, id: Date.now() } as Imovel;
-      setImoveis([novoImovel, ...imoveis]);
+      // Criação (INSERT)
+      const { error } = await supabase
+        .from('imoveis')
+        .insert([formData]);
+
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else {
+        setIsModalOpen(false);
+        carregarImoveis();
+      }
     }
-    setIsModalOpen(false);
+    setLoading(false);
   };
 
   return (
@@ -122,58 +197,64 @@ const AdminImoveis = () => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-              <th className="p-4 font-semibold text-center w-20">Foto</th>
-              <th className="p-4 font-semibold">Título e Localização</th>
-              <th className="p-4 font-semibold">Preço</th>
-              <th className="p-4 font-semibold text-center">Destaque</th>
-              <th className="p-4 font-semibold text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {imoveis.map((imovel) => (
-              <tr key={imovel.id} className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">
-                  {imovel.imagens.length > 0 ? (
-                    <img src={imovel.imagens[0]} alt={imovel.titulo} className="w-14 h-14 object-cover rounded-lg mx-auto shadow-sm" />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-100 rounded-lg mx-auto flex items-center justify-center">
-                      <ImageIcon className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                </td>
-                <td className="p-4">
-                  <div className="font-medium text-gray-800">{imovel.titulo}</div>
-                  <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3" /> {imovel.bairro}, {imovel.cidade} • {imovel.tipo}
-                  </div>
-                </td>
-                <td className="p-4 font-semibold text-blue-600">{formatarMoeda(imovel.preco)}</td>
-                <td className="p-4 text-center">
-                  <button 
-                    onClick={() => handleToggleDestaque(imovel.id)}
-                    className={`p-2 rounded-full transition-colors ${imovel.destaque ? 'text-yellow-500 bg-yellow-50' : 'text-gray-300 hover:bg-gray-100'}`}
-                    title={imovel.destaque ? 'Remover destaque' : 'Destacar na tela inicial'}
-                  >
-                    <Star className="w-5 h-5" fill={imovel.destaque ? "currentColor" : "none"} />
-                  </button>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => handleEditar(imovel)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleExcluir(imovel.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
+        {loading && imoveis.length === 0 ? (
+          <div className="p-12 flex justify-center items-center text-gray-500 gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" /> Carregando catálogo...
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
+                <th className="p-4 font-semibold text-center w-20">Foto</th>
+                <th className="p-4 font-semibold">Título e Localização</th>
+                <th className="p-4 font-semibold">Preço</th>
+                <th className="p-4 font-semibold text-center">Destaque</th>
+                <th className="p-4 font-semibold text-right">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {imoveis.map((imovel) => (
+                <tr key={imovel.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 text-center">
+                    {imovel.imagens && imovel.imagens.length > 0 ? (
+                      <img src={imovel.imagens[0]} alt={imovel.titulo} className="w-14 h-14 object-cover rounded-lg mx-auto shadow-sm" />
+                    ) : (
+                      <div className="w-14 h-14 bg-gray-100 rounded-lg mx-auto flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <div className="font-medium text-gray-800">{imovel.titulo}</div>
+                    <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3" /> {imovel.bairro}, {imovel.cidade} • {imovel.tipo}
+                    </div>
+                  </td>
+                  <td className="p-4 font-semibold text-blue-600">{formatarMoeda(imovel.preco)}</td>
+                  <td className="p-4 text-center">
+                    <button 
+                      onClick={() => handleToggleDestaque(imovel)}
+                      className={`p-2 rounded-full transition-colors ${imovel.destaque ? 'text-yellow-500 bg-yellow-50' : 'text-gray-300 hover:bg-gray-100'}`}
+                      title={imovel.destaque ? 'Remover destaque' : 'Destacar na tela inicial'}
+                    >
+                      <Star className="w-5 h-5" fill={imovel.destaque ? "currentColor" : "none"} />
+                    </button>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => handleEditar(imovel)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleExcluir(imovel.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {isModalOpen && (
@@ -201,9 +282,13 @@ const AdminImoveis = () => {
                       </div>
                     ))}
                     <label className="w-24 h-24 flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-blue-400 transition-colors">
-                      <Plus className="w-6 h-6 text-gray-400" />
-                      <span className="text-[10px] text-gray-500 mt-1">Adicionar</span>
-                      <input type="file" multiple accept="image/*" onChange={handleUploadFotos} className="hidden" />
+                      {uploading ? (
+                        <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                      ) : (
+                        <Plus className="w-6 h-6 text-gray-400" />
+                      )}
+                      <span className="text-[10px] text-gray-500 mt-1">{uploading ? 'Enviando...' : 'Adicionar'}</span>
+                      <input type="file" multiple accept="image/*" disabled={uploading} onChange={handleUploadFotos} className="hidden" />
                     </label>
                   </div>
                 </div>
@@ -211,7 +296,7 @@ const AdminImoveis = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Título do Anúncio</label>
-                    <input type="text" required value={formData.titulo} onChange={(e) => setFormData({...formData, titulo: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ex: Lindo apartamento mobiliado..." />
+                    <input type="text" required value={formData.titulo} onChange={(e) => setFormData({...formData, titulo: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ex: Lindo apartamento..." />
                   </div>
 
                   <div>
@@ -263,15 +348,18 @@ const AdminImoveis = () => {
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Descrição</label>
-                    <textarea rows={4} value={formData.descricao} onChange={(e) => setFormData({...formData, descricao: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none resize-none" placeholder="Descreva os diferenciais do imóvel..."></textarea>
+                    <textarea rows={4} value={formData.descricao} onChange={(e) => setFormData({...formData, descricao: e.target.value})} className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none resize-none" placeholder="Descreva os diferenciais..."></textarea>
                   </div>
                 </div>
               </form>
             </div>
 
             <div className="bg-gray-50 p-4 border-t border-gray-200 flex justify-end gap-3">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg font-medium transition-colors">Cancelar</button>
-              <button type="submit" form="imovelForm" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">Salvar Imóvel</button>
+              <button type="button" disabled={loading} onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg font-medium transition-colors">Cancelar</button>
+              <button type="submit" form="imovelForm" disabled={loading || uploading} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {imovelEditando ? 'Salvar Alterações' : 'Cadastrar Imóvel'}
+              </button>
             </div>
           </div>
         </div>
