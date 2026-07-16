@@ -1,34 +1,31 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, X, Home, Car, CheckCircle, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, X, Home, Car, CheckCircle, Info, Loader2 } from 'lucide-react';
+import { getSupabaseClient } from '../lib/supabase';
 
-// Tipagem para a Carta
+const supabase = getSupabaseClient()
+
+//tipagem carta
 interface Carta {
-  id: number;
+  id: string; 
   tipo: 'imovel' | 'veiculo';
   numero: string;
   credito: number;
   entrada: number;
   parcelas: number;
-  valorParcela: number;
+  valorParcela: number; 
   admin: string;
   status: 'disponivel' | 'reservado';
 }
-
-// Dados iniciais (os mesmos do front-end por enquanto)
-const dadosIniciais: Carta[] = [
-  { id: 1, tipo: 'imovel', numero: '12717', credito: 1054065.00, entrada: 508600.00, parcelas: 196, valorParcela: 6973.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 2, tipo: 'imovel', numero: '11980', credito: 935266.00, entrada: 433100.00, parcelas: 190, valorParcela: 6143.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 3, tipo: 'imovel', numero: '12049', credito: 812648.00, entrada: 406300.00, parcelas: 137, valorParcela: 6425.00, admin: 'Caixa', status: 'reservado' },
-];
 
 const formatarMoeda = (valor: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 };
 
 const AdminCartas = () => {
-  const [cartas, setCartas] = useState<Carta[]>(dadosIniciais);
+  const [cartas, setCartas] = useState<Carta[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cartaEditando, setCartaEditando] = useState<Carta | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Estados do Formulário
   const [formData, setFormData] = useState<Omit<Carta, 'id'>>({
@@ -41,6 +38,38 @@ const AdminCartas = () => {
     admin: '',
     status: 'disponivel'
   });
+
+  // 1. CARREGAR CARTAS DO BANCO DE DADOS
+  const carregarCartas = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('cartas_contempladas')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    if (error) {
+      alert('Erro ao buscar cartas do banco: ' + error.message);
+    } else if (data) {
+      // Mapear snake_case do banco de dados para camelCase do componente do seu amigo
+      const cartasMapeadas: Carta[] = data.map((item: any) => ({
+        id: item.id,
+        tipo: item.tipo,
+        numero: item.numero,
+        credito: Number(item.credito),
+        entrada: Number(item.entrada),
+        parcelas: item.parcelas,
+        valorParcela: Number(item.valor_parcela), // Conversão
+        admin: item.admin,
+        status: item.status
+      }));
+      setCartas(cartasMapeadas);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    carregarCartas();
+  }, []);
 
   // Função para abrir o modal de Nova Carta
   const handleNovaCarta = () => {
@@ -74,37 +103,82 @@ const AdminCartas = () => {
     setIsModalOpen(true);
   };
 
-  // Função para Excluir
-  const handleExcluir = (id: number) => {
+  // 2. EXCLUIR CARTA NO SUPABASE
+  const handleExcluir = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir esta carta?')) {
-      setCartas(cartas.filter(c => c.id !== id));
+      const { error } = await supabase
+        .from('cartas_contempladas')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        setCartas(cartas.filter(c => c.id !== id));
+      }
     }
   };
 
-  // Função para alternar o status rapidamente (Disponível <-> Reservado)
-  const toggleStatus = (id: number) => {
-    setCartas(cartas.map(c => {
-      if (c.id === id) {
-        return { ...c, status: c.status === 'disponivel' ? 'reservado' : 'disponivel' };
-      }
-      return c;
-    }));
+  // 3. ALTERAR STATUS RAPIDAMENTE (DISPONÍVEL <-> RESERVADO) NO BANCO
+  const toggleStatus = async (id: string, statusAtual: 'disponivel' | 'reservado') => {
+    const novoStatus = statusAtual === 'disponivel' ? 'reservado' : 'disponivel';
+
+    const { error } = await supabase
+      .from('cartas_contempladas')
+      .update({ status: novoStatus })
+      .eq('id', id);
+
+    if (error) {
+      alert('Erro ao alterar status: ' + error.message);
+    } else {
+      setCartas(cartas.map(c => c.id === id ? { ...c, status: novoStatus } : c));
+    }
   };
 
-  // Função para Salvar (Criar ou Editar)
-  const handleSalvar = (e: React.FormEvent) => {
+  // 4. SALVAR OU ATUALIZAR NO SUPABASE
+  const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setLoading(true);
+
+    // Mapear de volta camelCase do front para snake_case do banco de dados
+    const dadosParaSalvar = {
+      tipo: formData.tipo,
+      numero: formData.numero,
+      credito: formData.credito,
+      entrada: formData.entrada,
+      parcelas: formData.parcelas,
+      valor_parcela: formData.valorParcela, // Convertido para o banco
+      admin: formData.admin,
+      status: formData.status
+    };
+
     if (cartaEditando) {
       // Atualizar existente
-      setCartas(cartas.map(c => c.id === cartaEditando.id ? { ...formData, id: c.id } as Carta : c));
+      const { error } = await supabase
+        .from('cartas_contempladas')
+        .update(dadosParaSalvar)
+        .eq('id', cartaEditando.id);
+
+      if (error) {
+        alert('Erro ao atualizar dados: ' + error.message);
+      } else {
+        setIsModalOpen(false);
+        carregarCartas();
+      }
     } else {
-      // Criar nova (gerando um ID falso por enquanto)
-      const novaCarta = { ...formData, id: Date.now() } as Carta;
-      setCartas([novaCarta, ...cartas]);
+      // Criar nova
+      const { error } = await supabase
+        .from('cartas_contempladas')
+        .insert([dadosParaSalvar]);
+
+      if (error) {
+        alert('Erro ao cadastrar carta: ' + error.message);
+      } else {
+        setIsModalOpen(false);
+        carregarCartas();
+      }
     }
-    
-    setIsModalOpen(false);
+    setLoading(false);
   };
 
   return (
@@ -125,77 +199,83 @@ const AdminCartas = () => {
 
       {/* Tabela Administrativa */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-              <th className="p-4 font-semibold text-center w-16">Bem</th>
-              <th className="p-4 font-semibold">Nº da Carta</th>
-              <th className="p-4 font-semibold">Crédito</th>
-              <th className="p-4 font-semibold">Status</th>
-              <th className="p-4 font-semibold text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {cartas.map((carta) => (
-              <tr key={carta.id} className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">
-                  {carta.tipo === 'imovel' ? (
-                    <Home className="w-5 h-5 text-gray-400 mx-auto" />
-                  ) : (
-                    <Car className="w-5 h-5 text-gray-400 mx-auto" />
-                  )}
-                </td>
-                <td className="p-4 font-medium text-gray-800">
-                  {carta.numero}
-                  <div className="text-xs text-gray-400 font-normal">{carta.admin}</div>
-                </td>
-                <td className="p-4 font-semibold text-blue-600">{formatarMoeda(carta.credito)}</td>
-                <td className="p-4">
-                  <button 
-                    onClick={() => toggleStatus(carta.id)}
-                    className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit transition-all hover:opacity-80 ${
-                      carta.status === 'disponivel' 
-                      ? 'bg-green-100 text-green-700 border border-green-200' 
-                      : 'bg-gray-100 text-gray-600 border border-gray-200'
-                    }`}
-                    title="Clique para alterar o status"
-                  >
-                    {carta.status === 'disponivel' ? (
-                      <><CheckCircle className="w-3 h-3" /> Disponível</>
+        {loading && cartas.length === 0 ? (
+          <div className="p-12 flex justify-center items-center text-gray-500 gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" /> Sincronizando com o banco de dados...
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
+                <th className="p-4 font-semibold text-center w-16">Bem</th>
+                <th className="p-4 font-semibold">Nº da Carta</th>
+                <th className="p-4 font-semibold">Crédito</th>
+                <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {cartas.map((carta) => (
+                <tr key={carta.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 text-center">
+                    {carta.tipo === 'imovel' ? (
+                      <Home className="w-5 h-5 text-gray-400 mx-auto" />
                     ) : (
-                      <><Info className="w-3 h-3" /> Reservada</>
+                      <Car className="w-5 h-5 text-gray-400 mx-auto" />
                     )}
-                  </button>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center justify-end gap-2">
+                  </td>
+                  <td className="p-4 font-medium text-gray-800">
+                    {carta.numero}
+                    <div className="text-xs text-gray-400 font-normal">{carta.admin}</div>
+                  </td>
+                  <td className="p-4 font-semibold text-blue-600">{formatarMoeda(carta.credito)}</td>
+                  <td className="p-4">
                     <button 
-                      onClick={() => handleEditar(carta)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Editar"
+                      onClick={() => toggleStatus(carta.id, carta.status)}
+                      className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit transition-all hover:opacity-80 ${
+                        carta.status === 'disponivel' 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-gray-100 text-gray-600 border border-gray-200'
+                      }`}
+                      title="Clique para alterar o status"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      {carta.status === 'disponivel' ? (
+                        <><CheckCircle className="w-3 h-3" /> Disponível</>
+                      ) : (
+                        <><Info className="w-3 h-3" /> Reservada</>
+                      )}
                     </button>
-                    <button 
-                      onClick={() => handleExcluir(carta.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {cartas.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500">
-                  Nenhuma carta cadastrada no momento.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => handleEditar(carta)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Editar"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleExcluir(carta.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {cartas.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                    Nenhuma carta cadastrada no momento.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Modal de Cadastro/Edição */}
@@ -325,8 +405,10 @@ const AdminCartas = () => {
               <button 
                 type="submit" 
                 form="cartaForm"
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                disabled={loading}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Salvar Carta
               </button>
             </div>
