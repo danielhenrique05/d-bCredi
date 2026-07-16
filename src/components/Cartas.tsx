@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Car, Eye, Filter, X, CheckCircle, Info } from 'lucide-react';
+import { getSupabaseClient } from '../lib/supabase'; // Garanta que o caminho para o seu cliente do supabase está correto
+const supabase = getSupabaseClient()
 
-// Dados fictícios (você pode substituir por dados do seu backend depois)
-const cartas = [
-  { id: 1, tipo: 'imovel', numero: '12717', credito: 1054065.00, entrada: 508600.00, parcelas: 196, valorParcela: 6973.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 2, tipo: 'imovel', numero: '11980', credito: 935266.00, entrada: 433100.00, parcelas: 190, valorParcela: 6143.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 3, tipo: 'imovel', numero: '12049', credito: 812648.00, entrada: 406300.00, parcelas: 137, valorParcela: 6425.00, admin: 'Caixa', status: 'reservado' },
-  { id: 4, tipo: 'imovel', numero: '12975', credito: 806289.00, entrada: 389500.00, parcelas: 190, valorParcela: 5193.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 5, tipo: 'veiculo', numero: '13160', credito: 772484.00, entrada: 384100.00, parcelas: 83, valorParcela: 7161.00, admin: 'Santander', status: 'reservado' },
-  { id: 6, tipo: 'veiculo', numero: '12355', credito: 769345.00, entrada: 375900.00, parcelas: 196, valorParcela: 4985.00, admin: 'HS Consórcios', status: 'disponivel' },
-  { id: 7, tipo: 'veiculo', numero: '13473', credito: 737940.00, entrada: 361700.00, parcelas: 182, valorParcela: 4639.00, admin: 'Caixa', status: 'disponivel' },
-];
+interface Carta {
+  id: number;
+  tipo: 'imovel' | 'veiculo';
+  numero: string;
+  credito: number;
+  entrada: number;
+  parcelas: number;
+  valorParcela: number; // Certifique-se de que no seu banco está "valorParcela" ou "valor_parcela"
+  admin: string;
+  status: 'disponivel' | 'reservado';
+}
 
 const formatarMoeda = (valor: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 };
 
 const CartasContempladas: React.FC = () => {
+  const [cartas, setCartas] = useState<Carta[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'imovel' | 'veiculo'>('todos');
   const [exibirDisponiveis, setExibirDisponiveis] = useState(true);
   const [exibirReservadas, setExibirReservadas] = useState(true);
@@ -26,7 +31,43 @@ const CartasContempladas: React.FC = () => {
   const [filtroCredito, setFiltroCredito] = useState<number>(1000000); 
 
   // Estado para o Modal (Janelinha)
-  const [cartaSelecionada, setCartaSelecionada] = useState<typeof cartas[0] | null>(null);
+  const [cartaSelecionada, setCartaSelecionada] = useState<Carta | null>(null);
+
+  // Buscar cartas do Supabase
+  useEffect(() => {
+    const buscarCartas = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('cartas_contempladas')
+          .select('*');
+
+        if (error) throw error;
+        
+        if (data) {
+          // Mapeia caso as colunas do banco usem snake_case (ex: valor_parcela para valorParcela)
+          const cartasFormatadas = data.map((item: any) => ({
+            id: item.id,
+            tipo: item.tipo,
+            numero: item.numero,
+            credito: Number(item.credito),
+            entrada: Number(item.entrada),
+            parcelas: Number(item.parcelas),
+            valorParcela: Number(item.valor_parcela || item.valorParcela),
+            admin: item.admin,
+            status: item.status
+          }));
+          setCartas(cartasFormatadas);
+        }
+      } catch (err: any) {
+        console.error('Erro ao buscar cartas do banco:', err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    buscarCartas();
+  }, []);
 
   // Filtragem dos dados
   const cartasFiltradas = cartas.filter(carta => {
@@ -43,7 +84,7 @@ const CartasContempladas: React.FC = () => {
 
   // Função para chamar o WhatsApp
   const handleNegociar = (numero: string, valor: number) => {
-    const telefone = "558881498642"; // Coloque o número do seu WhatsApp aqui
+    const telefone = "558881498642"; // Seu WhatsApp
     const texto = `Olá! Tenho interesse em negociar a carta contemplada Nº ${numero} no valor de ${formatarMoeda(valor)}.`;
     window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`, '_blank');
   };
@@ -58,7 +99,7 @@ const CartasContempladas: React.FC = () => {
           </p>
         </div>
 
-        {/* Área de Filtros Redesenhada e sem bugs */}
+        {/* Área de Filtros */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
           <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
             <Filter className="w-5 h-5 text-blue-600" />
@@ -125,7 +166,7 @@ const CartasContempladas: React.FC = () => {
                 <input 
                   type="range" 
                   min="10000" 
-                  max="1000000" 
+                  max="2000000" 
                   step="5000"
                   value={valorSlider}
                   onChange={(e) => setValorSlider(Number(e.target.value))}
@@ -145,90 +186,95 @@ const CartasContempladas: React.FC = () => {
 
         {/* Tabela de Cartas */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-                <th className="p-4 font-bold text-center w-16">Bem</th>
-                <th className="p-4 font-bold text-center">Nº da Carta</th>
-                <th className="p-4 font-bold text-blue-600">Crédito</th>
-                <th className="p-4 font-bold">Entrada</th>
-                <th className="p-4 font-bold">Parcelas</th>
-                <th className="p-4 font-bold text-center">Administradora</th>
-                <th className="p-4 font-bold text-center w-40">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {cartasFiltradas.length > 0 ? (
-                cartasFiltradas.map((carta) => (
-                  <tr key={carta.id} className="hover:bg-blue-50/50 transition-colors">
-                    <td className="p-4 text-center">
-                      {carta.tipo === 'imovel' ? (
-                        <div className="bg-blue-100 p-2 rounded-lg inline-block">
-                          <Home className="w-5 h-5 text-blue-700" />
-                        </div>
-                      ) : (
-                        <div className="bg-blue-100 p-2 rounded-lg inline-block">
-                          <Car className="w-5 h-5 text-blue-700" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4 text-center font-bold text-gray-700">{carta.numero}</td>
-                    <td className="p-4 font-extrabold text-blue-700 text-lg">{formatarMoeda(carta.credito)}</td>
-                    <td className="p-4 text-gray-700 font-medium">{formatarMoeda(carta.entrada)}</td>
-                    <td className="p-4 text-gray-600 text-sm">
-                      <span className="font-bold text-gray-800">{carta.parcelas}x</span> de {formatarMoeda(carta.valorParcela)}
-                    </td>
-                    <td className="p-4 text-center text-gray-500 font-medium text-sm">
-                      {carta.admin}
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <button 
-                          onClick={() => setCartaSelecionada(carta)}
-                          className="p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg hover:bg-blue-100" 
-                          title="Ver detalhes"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        {carta.status === 'disponivel' ? (
-                          <button 
-                            onClick={() => handleNegociar(carta.numero, carta.credito)}
-                            className="w-full bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors shadow-sm"
-                          >
-                            Negociar
-                          </button>
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">
+              <p className="animate-pulse">Carregando cartas contempladas...</p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
+                  <th className="p-4 font-bold text-center w-16">Bem</th>
+                  <th className="p-4 font-bold text-center">Nº da Carta</th>
+                  <th className="p-4 font-bold text-blue-600">Crédito</th>
+                  <th className="p-4 font-bold">Entrada</th>
+                  <th className="p-4 font-bold">Parcelas</th>
+                  <th className="p-4 font-bold text-center">Administradora</th>
+                  <th className="p-4 font-bold text-center w-40">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {cartasFiltradas.length > 0 ? (
+                  cartasFiltradas.map((carta) => (
+                    <tr key={carta.id} className="hover:bg-blue-50/50 transition-colors">
+                      <td className="p-4 text-center">
+                        {carta.tipo === 'imovel' ? (
+                          <div className="bg-blue-100 p-2 rounded-lg inline-block">
+                            <Home className="w-5 h-5 text-blue-700" />
+                          </div>
                         ) : (
-                          <button 
-                            disabled
-                            className="w-full bg-gray-100 text-gray-500 px-3 py-2 rounded-lg font-bold text-sm cursor-not-allowed border border-gray-200"
-                          >
-                            Reservada
-                          </button>
+                          <div className="bg-blue-100 p-2 rounded-lg inline-block">
+                            <Car className="w-5 h-5 text-blue-700" />
+                          </div>
                         )}
-                      </div>
+                      </td>
+                      <td className="p-4 text-center font-bold text-gray-700">{carta.numero}</td>
+                      <td className="p-4 font-extrabold text-blue-700 text-lg">{formatarMoeda(carta.credito)}</td>
+                      <td className="p-4 text-gray-700 font-medium">{formatarMoeda(carta.entrada)}</td>
+                      <td className="p-4 text-gray-600 text-sm">
+                        <span className="font-bold text-gray-800">{carta.parcelas}x</span> de {formatarMoeda(carta.valorParcela)}
+                      </td>
+                      <td className="p-4 text-center text-gray-500 font-medium text-sm">
+                        {carta.admin}
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button 
+                            onClick={() => setCartaSelecionada(carta)}
+                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg hover:bg-blue-100" 
+                            title="Ver detalhes"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          {carta.status === 'disponivel' ? (
+                            <button 
+                              onClick={() => handleNegociar(carta.numero, carta.credito)}
+                              className="w-full bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors shadow-sm"
+                            >
+                              Negociar
+                            </button>
+                          ) : (
+                            <button 
+                              disabled
+                              className="w-full bg-gray-100 text-gray-500 px-3 py-2 rounded-lg font-bold text-sm cursor-not-allowed border border-gray-200"
+                            >
+                              Reservada
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-12 text-center text-gray-500 bg-gray-50">
+                      <Filter className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="font-medium text-lg">Nenhuma carta encontrada.</p>
+                      <p className="text-sm mt-1">Tente ajustar os filtros de busca acima.</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="p-12 text-center text-gray-500 bg-gray-50">
-                    <Filter className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="font-medium text-lg">Nenhuma carta encontrada.</p>
-                    <p className="text-sm mt-1">Tente ajustar os filtros de busca acima.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
-      {/* Modal / Janelinha de Detalhes da Carta */}
+      {/* Modal / Janelinha de Detalhes */}
       {cartaSelecionada && (
         <div className="fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all">
             
-            {/* Header do Modal */}
             <div className="bg-blue-700 p-5 flex justify-between items-center text-white">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-lg">
@@ -249,10 +295,7 @@ const CartasContempladas: React.FC = () => {
               </button>
             </div>
 
-            {/* Corpo do Modal */}
             <div className="p-6">
-              
-              {/* Status Badge */}
               <div className="flex items-center gap-2 mb-6">
                 {cartaSelecionada.status === 'disponivel' ? (
                   <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-green-200">
@@ -265,7 +308,6 @@ const CartasContempladas: React.FC = () => {
                 )}
               </div>
 
-              {/* Grid de Informações */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <p className="text-xs text-gray-500 font-bold uppercase mb-1">Valor do Crédito</p>
@@ -288,12 +330,11 @@ const CartasContempladas: React.FC = () => {
                 </div>
               </div>
 
-              {/* Botão de Ação */}
               {cartaSelecionada.status === 'disponivel' ? (
                 <button 
                   onClick={() => {
                     handleNegociar(cartaSelecionada.numero, cartaSelecionada.credito);
-                    setCartaSelecionada(null); // Fecha o modal após clicar
+                    setCartaSelecionada(null);
                   }}
                   className="w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors shadow-md flex items-center justify-center gap-2"
                 >
@@ -307,12 +348,10 @@ const CartasContempladas: React.FC = () => {
                   Indisponível no Momento
                 </button>
               )}
-
             </div>
           </div>
         </div>
       )}
-
     </section>
   );
 };
