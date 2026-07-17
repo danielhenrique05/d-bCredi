@@ -84,7 +84,7 @@ const CartasContempladas: React.FC = () => {
 
   // Função para chamar o WhatsApp
   const handleNegociar = (numero: string, valor: number) => {
-    const telefone = "558881498642"; // Seu WhatsApp
+    const telefone = "554999103430";
     const texto = `Olá! Tenho interesse em negociar a carta contemplada Nº ${numero} no valor de ${formatarMoeda(valor)}.`;
     window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`, '_blank');
   };

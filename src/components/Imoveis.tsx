@@ -169,7 +169,7 @@ const Imoveis: React.FC<ImoveisProps> = ({ onSelectImovel }) => {
                         </button>
 
                         <a
-                          href={`https://wa.me/558881498642?text=${encodeURIComponent(`Ola! Tenho interesse no imovel: ${imovel.titulo}`)}`}
+                          href={`https://wa.me/554999103430?text=${encodeURIComponent(`Ola! Tenho interesse no imovel: ${imovel.titulo}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex w-full items-center justify-center rounded-lg bg-green-600 py-3 font-semibold text-white transition-colors hover:bg-green-700"

@@ -1,6 +1,6 @@
 import React from 'react';
-import Logo from '../imgs/d&blogo.png'
-import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from 'lucide-react';
+import { Facebook, Instagram, MessageCircle, Phone } from 'lucide-react';
+import Logo from '../imgs/d&blogo.png';
 
 interface FooterProps {
   onSectionChange: (section: string) => void;
@@ -8,168 +8,63 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onSectionChange }) => {
   return (
-    <footer className="bg-gray-800 text-white py-12">
+    <footer className="bg-gray-800 py-12 text-white">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="text-white p-2 rounded-lg">
-                <img className="h-16 w-16" src={Logo} alt="d&b Credi" />
-              </div>
+            <div className="mb-4 flex items-center gap-2">
+              <img className="h-16 w-16" src={Logo} alt="d&b Credi" />
               <div>
                 <h3 className="text-xl font-bold">d&b Credi</h3>
-                <p className="text-sm text-gray-400">Crédito que transforma vidas</p>
+                <p className="text-sm text-gray-400">O crédito que você precisa</p>
               </div>
             </div>
-            <p className="text-gray-400 mb-4">
-              Há mais de 10 anos oferecendo soluções financeiras acessíveis e transformando vidas através do crédito responsável e consórcios.
+            <p className="mb-4 text-gray-400">
+              Soluções financeiras inteligentes, seguras e acessíveis para transformar sonhos em conquistas.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
+              <a href="https://www.facebook.com/dbcrediconcordia" target="_blank" rel="noopener noreferrer" aria-label="Facebook da d&b Credi" className="text-gray-400 transition-colors hover:text-white"><Facebook className="h-5 w-5" /></a>
+              <a href="https://www.instagram.com/dbcredi" target="_blank" rel="noopener noreferrer" aria-label="Instagram da d&b Credi" className="text-gray-400 transition-colors hover:text-white"><Instagram className="h-5 w-5" /></a>
             </div>
           </div>
 
-          {/* Links Rápidos */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Links Rápidos</h4>
-            <ul className="space-y-2">
-              <li>
-                <button
-                  onClick={() => onSectionChange('home')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Início
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onSectionChange('about')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Sobre Nós e Contato
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onSectionChange('products')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Consignado e Consórcios
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onSectionChange('cartas')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Cartas Contempladas
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onSectionChange('imoveis')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Imóveis
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onSectionChange('simulator')}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Simulador
-                </button>
-              </li>
-            </ul>
+            <h4 className="mb-4 text-lg font-semibold">Links Rápidos</h4>
+            <div className="flex flex-col gap-2">
+              {[['home', 'Início'], ['about', 'Sobre Nós'], ['products', 'Consignado e Consórcios'], ['cartas', 'Cartas Contempladas'], ['imoveis', 'Imóveis'], ['simulator', 'Simulador']].map(([section, label]) => (
+                <button key={section} type="button" onClick={() => onSectionChange(section)} className="text-left text-gray-400 transition-colors hover:text-white">{label}</button>
+              ))}
+            </div>
           </div>
 
-          {/* Produtos e Serviços Novos */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Nossos Serviços</h4>
-            <ul className="space-y-2">
-              <li>
-                <button onClick={() => onSectionChange('products')} className="text-gray-400 hover:text-white transition-colors">
-                  Consignado INSS
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSectionChange('products')} className="text-gray-400 hover:text-white transition-colors">
-                  Consórcios
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSectionChange('cartas')} className="text-gray-400 hover:text-white transition-colors">
-                  Cartas Contempladas
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSectionChange('imoveis')} className="text-gray-400 hover:text-white transition-colors">
-                  Imóveis à Venda
-                </button>
-              </li>
-            </ul>
+            <h4 className="mb-4 text-lg font-semibold">Nossos Valores</h4>
+            <div className="space-y-2 text-gray-400">
+              <p>Honestidade e transparência</p>
+              <p>Compromisso e respeito</p>
+              <p>Excelência no atendimento</p>
+              <p>Fé, trabalho e dedicação</p>
+            </div>
           </div>
 
-          {/* Contato */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Contato</h4>
+            <h4 className="mb-4 text-lg font-semibold">Atendimento</h4>
             <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">(11) 3333-4444</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">contato@credifinance.com.br</span>
-              </div>
-              <div className="mt-4">
-                <p className="text-gray-400 text-sm">
-                  Av. Paulista, 1000 - Bela Vista<br />
-                  São Paulo - SP, 01310-100
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <a
-                href="https://wa.me/5511987654321"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                WhatsApp
-              </a>
+              <a href="tel:+554999103430" className="flex items-center gap-2 text-gray-400 transition-colors hover:text-white"><Phone className="h-4 w-4 text-blue-400" /> +55 49 9910-3430</a>
+              <p className="text-sm text-gray-400">Fale com nossa equipe e encontre a solução ideal para seus planos.</p>
+              <a href="https://wa.me/554999103430" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition-colors hover:bg-green-700"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-700 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2024 d&b Credi. Todos os direitos reservados.
-            </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Política de Privacidade
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Termos de Uso
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Ouvidoria
-              </a>
-            </div>
+        <div className="mt-8 flex flex-col gap-3 border-t border-gray-700 pt-8 text-center text-sm text-gray-400 md:flex-row md:items-center md:justify-between md:text-left">
+          <div>
+            <p>© {new Date().getFullYear()} d&b Credi. Todos os direitos reservados.</p>
+            <p className="mt-1">d&b Credi | CNPJ: 28.125.510/0001-04</p>
+          </div>
+          <div className="md:text-right">
+            <p>Atendimento: +55 49 9910-3430</p>
+            <p className="mt-1">Crédito consciente para realizar seus objetivos.</p>
           </div>
         </div>
       </div>

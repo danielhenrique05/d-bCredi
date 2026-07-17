@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, TrendingUp, Users, Shield, Home } from 'lucide-react';
+import { ArrowRight, HeartHandshake, ShieldCheck, Target, TrendingUp } from 'lucide-react';
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
@@ -7,55 +7,56 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
   return (
-    <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-20">
+    <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 py-20 text-white">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
-            <h2 className="text-5xl font-bold mb-6 leading-tight">
-              A chave para a sua <span className="text-yellow-400">nova conquista</span>
+            <p className="mb-4 text-sm font-bold uppercase tracking-[0.24em] text-yellow-300">d&b Credi</p>
+            <h2 className="mb-6 text-5xl font-bold leading-tight">
+              Transformamos sonhos em <span className="text-yellow-400">conquistas</span>
             </h2>
-            <p className="text-xl mb-8 text-blue-100">
-              Oferecemos as melhores oportunidades em Consignado INSS, Consórcios, Cartas Contempladas e o Imóvel dos seus sonhos. 
-              Segurança, agilidade e condições que cabem no seu bolso.
+            <p className="mb-8 text-xl text-blue-100">
+              Soluções financeiras inteligentes, seguras e acessíveis para quem quer planejar, realizar e crescer com confiança.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              
-              <button
-                onClick={() => onSectionChange('cartas')}
-                className="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg font-semibold hover:bg-yellow-300 transition-colors flex items-center justify-center space-x-2"
+            <div className="mb-12 flex flex-col gap-4 sm:flex-row">
+              <a
+                href="https://wa.me/554999103430"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-lg bg-yellow-400 px-8 py-4 font-semibold text-blue-900 transition-colors hover:bg-yellow-300"
               >
-                <span>Ver Cartas Contempladas</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
+                Falar no WhatsApp <ArrowRight className="h-5 w-5" />
+              </a>
               <button
-                onClick={() => onSectionChange('imoveis')}
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-800 transition-colors"
+                type="button"
+                onClick={() => onSectionChange('products')}
+                className="rounded-lg border-2 border-white px-8 py-4 font-semibold text-white transition-colors hover:bg-white hover:text-blue-800"
               >
-                Conhecer Imóveis
+                Conhecer soluções
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <TrendingUp className="w-12 h-12 text-yellow-400 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">R$ 50M+</h3>
-              <p className="text-blue-100">Em negócios realizados</p>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
+              <TrendingUp className="mb-4 h-12 w-12 text-yellow-400" />
+              <h3 className="mb-2 text-2xl font-bold">9 anos</h3>
+              <p className="text-blue-100">Ajudando pessoas a conquistar seus objetivos</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <Users className="w-12 h-12 text-yellow-400 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">15.000+</h3>
-              <p className="text-blue-100">Clientes realizados</p>
+            <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
+              <HeartHandshake className="mb-4 h-12 w-12 text-yellow-400" />
+              <h3 className="mb-2 text-2xl font-bold">Atendimento humano</h3>
+              <p className="text-blue-100">Próximo, transparente e comprometido</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <Shield className="w-12 h-12 text-yellow-400 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">98%</h3>
-              <p className="text-blue-100">Taxa de satisfação</p>
+            <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
+              <ShieldCheck className="mb-4 h-12 w-12 text-yellow-400" />
+              <h3 className="mb-2 text-2xl font-bold">Crédito consciente</h3>
+              <p className="text-blue-100">Segurança para cada decisão financeira</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <Home className="w-12 h-12 text-yellow-400 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">Imóveis</h3>
-              <p className="text-blue-100">As melhores opções da região</p>
+            <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
+              <Target className="mb-4 h-12 w-12 text-yellow-400" />
+              <h3 className="mb-2 text-2xl font-bold">Consórcio planejado</h3>
+              <p className="text-blue-100">Estratégia para realizar novos planos</p>
             </div>
           </div>
         </div>
