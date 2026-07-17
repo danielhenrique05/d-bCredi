@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { BarChart3, Building2, FileCog, Users } from 'lucide-react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
@@ -10,6 +10,7 @@ import Cartas from './components/Cartas';
 import Footer from './components/Footer';
 import Imoveis from './components/Imoveis';
 import ImovelDetalhes from './components/ImovelDetalhes';
+import type { Imovel } from './types';
 import AdminCartas from './admin/AdminCartas';
 import AdminImoveis from './admin/AdminImoveis'; // <-- Importação do novo painel de Imóveis
 
@@ -18,7 +19,7 @@ const AdminLayout = lazy(() => import('./admin/AdminLayout'));
 
 const PublicSite = () => {
   const [currentSection, setCurrentSection] = useState('home');
-  const [imovelSelecionado, setImovelSelecionado] = useState<any | null>(null);
+  const [imovelSelecionado, setImovelSelecionado] = useState<Imovel | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -1,1 +1,1 @@
-export { supabase } from '../lib/supabase';
+export { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';

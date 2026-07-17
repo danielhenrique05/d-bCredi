@@ -29,3 +29,20 @@ export interface BlogPost {
   image: string;
   category: string;
 }
+
+export interface Imovel {
+  id: string;
+  titulo: string;
+  tipo: string;
+  preco: number;
+  cidade: string;
+  bairro: string;
+  quartos: number;
+  banheiros: number;
+  vagas: number;
+  area: number;
+  descricao: string;
+  imagem_url: string | null;
+  imagens: string[];
+  destaque: boolean;
+}
