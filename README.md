@@ -1,46 +1,61 @@
-# 🏢 d&bCredi
+# 🏢 d-bCredi | Plataforma SaaS de Gestão de Imóveis
 
-> Um sistema moderno de gerenciamento de imóveis e cartas de crédito, desenvolvido com uma arquitetura segura e interface de alta performance.
+Uma solução moderna e de alta performance desenvolvida para imobiliárias e corretores autônomos gerenciarem seus portfólios de imóveis de forma simples, rápida e segura. O projeto conta com um portal público para clientes e um painel administrativo protegido para gerenciamento de anúncios.
 
 ---
 
-## 📌 Sobre o Projeto
+## 🚀 Funcionalidades Principais
 
-Este projeto foi desenvolvido para resolver a necessidade de [inserir o objetivo aqui, ex: uma empresa de consultoria imobiliária que precisa gerenciar sua vitrine de imóveis e propostas de cartas de crédito]. O sistema conta com uma área pública para os clientes e um painel administrativo protegido para os gestores.
+### 🌐 Portal Público (Área do Cliente)
+* **Vitrine de Imóveis:** Listagem dinâmica de imóveis integrados em tempo real com o banco de dados.
+* **Filtros Inteligentes:** Busca refinada por tipo, localização, preço, quantidade de quartos e área ($m^2$).
+* **Imóveis em Destaque:** Seção dedicada para promover imóveis selecionados pelo administrador.
 
-### 🚀 Principais Funcionalidades
-* **Vitrine Pública:** Visualização de imóveis disponíveis e simulador de cartas de crédito.
-* **Painel Admin:** Área restrita para cadastro, edição e exclusão de imóveis (CRUD completo).
-* **Autenticação Segura:** Login administrativo integrado ao serviço de autenticação do Supabase.
-* **Segurança Avançada (RLS):** Banco de dados protegido no nível de linha (Row Level Security), impedindo acessos maliciosos diretamente no frontend.
+### 🔐 Painel Administrativo (Área do Corretor)
+* **Controle de Acesso Seguro:** Autenticação via Supabase Auth (apenas administradores autorizados).
+* **Cadastro Completo:** Formulário otimizado para inserção de títulos, descrições, preços, detalhes estruturais (quartos, banheiros, vagas, área) e localização.
+* **Galeria de Fotos integrada:** Upload direto de imagens para o Supabase Storage com geração automática de capas de exibição (`imagem_url`).
+* **Gerenciamento Ativo:** Opções para criar, editar, destacar ou excluir anúncios rapidamente.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-O projeto foi construído utilizando as melhores práticas do mercado com as seguintes tecnologias:
+O projeto foi construído utilizando o que há de mais moderno no desenvolvimento web para garantir velocidade e segurança:
 
-| Tecnologia | Função no Projeto |
-| :--- | :--- |
-| **React + Vite** | Framework Frontend e ambiente de desenvolvimento rápido |
-| **TypeScript** | Tipagem estática para maior segurança no código |
-| **Tailwind CSS** | Estilização moderna, responsiva e utilitária |
-| **Supabase** | Backend-as-a-Service (Autenticação, Banco Postgres e RLS) |
-| **Lucide React** | Pacote de ícones minimalistas e modernos |
-| **React Router** | Gerenciamento de rotas SPA e proteção de caminhos |
+* **Frontend:** React.js / Next.js com TypeScript e Tailwind CSS (para uma interface responsiva e elegante).
+* **Backend como Serviço (BaaS):** [Supabase](https://supabase.com/) (Autenticação, Banco de Dados PostgreSQL e Storage de Imagens).
+* **Hospedagem & Deploy:** [Vercel](https://vercel.com/) (Integração contínua e entrega global de conteúdo via CDN).
 
 ---
 
-## 🔒 Arquitetura de Segurança
+## 📦 Estrutura do Banco de Dados (PostgreSQL)
 
-Atendendo a critérios rigorosos de segurança em aplicações SPA (Single Page Application):
-1. **Row Level Security (RLS):** Todas as tabelas do PostgreSQL possuem políticas ativas onde apenas o usuário administrador autenticado possui permissões de escrita (`INSERT`, `UPDATE`, `DELETE`), enquanto a leitura (`SELECT`) é pública.
-2. **Variáveis de Ambiente:** Chaves de API de desenvolvimento e produção isoladas via arquivos `.env` e gerenciadas de forma segura na hospedagem.
+A tabela de `imoveis` no Supabase possui a seguinte estrutura de colunas otimizada para o sistema:
+
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `id` | `uuid` | Chave primária gerada automaticamente |
+| `titulo` | `text` | Título comercial do anúncio |
+| `tipo` | `text` | Tipo do imóvel (Ex: Casa, Apartamento, Terreno) |
+| `preco` | `numeric` | Valor de venda em Reais (R$) |
+| `cidade` | `text` | Cidade onde o imóvel está localizado |
+| `bairro` | `text` | Bairro onde o imóvel está localizado |
+| `quartos` | `integer` | Quantidade de quartos do imóvel |
+| `banheiros` | `integer` | Quantidade de banheiros do imóvel |
+| `vagas` | `integer` | Vagas de garagem |
+| `area` | `numeric` | Metragem total do imóvel em $m^2$ |
+| `descricao` | `text` | Detalhamento sobre o imóvel |
+| `imagem_url` | `text` | URL da imagem principal (Capa) |
+| `imagens` | `text[]` | Array de URLs das fotos (Galeria) |
+| `destaque` | `boolean` | Define se o imóvel aparece na home (`true`/`false`) |
+| `criado_em` | `timestamp` | Data de criação automática do registro |
 
 ---
 
-## 📦 Como Executar o Projeto Localmente
+## 🔧 Como Rodar o Projeto Localmente
 
-1. Clone o repositório:
-   ```bash
-   git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
+### 1. Clonar o Repositório
+```bash
+git clone [https://github.com/seu-usuario/nome-do-repositorio.git](https://github.com/seu-usuario/nome-do-repositorio.git)
+cd nome-do-repositorio
