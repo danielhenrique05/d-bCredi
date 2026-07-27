@@ -57,7 +57,7 @@ import { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';
     });
 
     if (signInError) {
-      setError('Credenciais invalidas ou acesso nao autorizado.');
+      setError('Credenciais invalidas ou acesso não autorizado.');
       setIsLoading(false);
       return;
     }

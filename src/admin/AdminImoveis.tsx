@@ -248,7 +248,7 @@ const AdminImoveis = () => {
                 <th className="p-4 font-semibold">Titulo e Localizacao</th>
                 <th className="p-4 font-semibold">Preco</th>
                 <th className="p-4 text-center font-semibold">Destaque</th>
-                <th className="p-4 text-right font-semibold">Acoes</th>
+                <th className="p-4 text-right font-semibold">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

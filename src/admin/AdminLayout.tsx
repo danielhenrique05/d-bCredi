@@ -63,11 +63,11 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-blue-100 bg-white shadow-sm">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_28%),linear-gradient(135deg,_#f8fbff_0%,_#f3f7ff_100%)]">
+      <header className="border-b border-blue-100/80 bg-white/90 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-700 text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 to-indigo-700 text-white shadow-lg shadow-blue-200">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
@@ -79,7 +79,7 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden rounded-2xl border border-blue-100 bg-blue-50 px-4 py-2 text-right sm:block">
+            <div className="hidden rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-2 text-right sm:block">
               <p className="text-xs uppercase tracking-[0.2em] text-blue-500">Usuário</p>
               <p className="text-sm font-medium text-gray-700">{session.user.email}</p>
             </div>
@@ -97,7 +97,7 @@ const AdminLayout = () => {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mb-6 rounded-[28px] bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-6 text-white shadow-xl">
+        <section className="mb-6 rounded-[28px] bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 p-6 text-white shadow-[0_24px_60px_rgba(30,64,175,0.22)]">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
               <LayoutDashboard className="h-6 w-6" />
@@ -112,42 +112,44 @@ const AdminLayout = () => {
         </section>
 
         {/* MENU DE NAVEGAÇÃO DO ADMIN */}
-        <nav className="mb-8 flex flex-wrap gap-2 border-b border-gray-200 pb-4">
-          <Link
-            to="/admin/dashboard"
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
-              location.pathname === '/admin/dashboard'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-            }`}
-          >
-            <LayoutDashboard className="h-4 w-4" />
-            Início
-          </Link>
-          
-          <Link
-            to="/admin/cartas"
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
-              location.pathname === '/admin/cartas'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-            }`}
-          >
-            <CreditCard className="h-4 w-4" />
-            Cartas Contempladas
-          </Link>
+        <nav className="mb-8 rounded-[24px] border border-blue-100 bg-white/80 p-2 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/admin/dashboard"
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                location.pathname === '/admin/dashboard'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Início
+            </Link>
 
-          <Link
-            to="/admin/imoveis"
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
-              location.pathname === '/admin/imoveis'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-            }`}
-          >
-            <Building className="h-4 w-4" />
-            Imóveis
-          </Link>
+            <Link
+              to="/admin/cartas"
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                location.pathname === '/admin/cartas'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <CreditCard className="h-4 w-4" />
+              Cartas Contempladas
+            </Link>
+
+            <Link
+              to="/admin/imoveis"
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                location.pathname === '/admin/imoveis'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Building className="h-4 w-4" />
+              Imóveis
+            </Link>
+          </div>
         </nav>
         <Outlet />
       </main>
