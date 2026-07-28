@@ -88,10 +88,10 @@ const Products: React.FC<ProductsProps> = ({ onSectionChange }) => {
               
               <div className="p-6 bg-gray-50 border-t">
                 <button 
-                  onClick={() => onSectionChange('simulator')}
+                  onClick={() => onSectionChange('contact')}
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Simular Agora
+                  Fale com a gente
                 </button>
               </div>
             </div>

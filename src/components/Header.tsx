@@ -13,7 +13,6 @@ const menuItems = [
   { id: 'products', label: 'Consignado e Consórcios' },
   { id: 'cartas', label: 'Cartas Contempladas' },
   { id: 'imoveis', label: 'Imóveis' },
-  { id: 'simulator', label: 'Simulador' },
 ];
 
 const Header: React.FC<HeaderProps> = ({ currentSection, onSectionChange }) => {

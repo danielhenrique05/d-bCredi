@@ -5,7 +5,6 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
 import Products from './components/Products';
-import Simulator from './components/Simulator';
 import Cartas from './components/Cartas';
 import Footer from './components/Footer';
 import Imoveis from './components/Imoveis';
@@ -49,8 +48,6 @@ const PublicSite = () => {
           );
         }
         return <Imoveis onSelectImovel={(imovel) => setImovelSelecionado(imovel)} />;
-      case 'simulator':
-        return <Simulator onSectionChange={handleSectionChange} />;
       case 'cartas':
         return <Cartas />;
       default:

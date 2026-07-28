@@ -31,7 +31,7 @@ const Footer: React.FC<FooterProps> = ({ onSectionChange }) => {
           <div>
             <h4 className="mb-4 text-lg font-semibold">Links Rápidos</h4>
             <div className="flex flex-col gap-2">
-              {[['home', 'Início'], ['about', 'Sobre Nós'], ['products', 'Consignado e Consórcios'], ['cartas', 'Cartas Contempladas'], ['imoveis', 'Imóveis'], ['simulator', 'Simulador']].map(([section, label]) => (
+              {[['home', 'Início'], ['about', 'Sobre Nós'], ['products', 'Consignado e Consórcios'], ['cartas', 'Cartas Contempladas'], ['imoveis', 'Imóveis']].map(([section, label]) => (
                 <button key={section} type="button" onClick={() => onSectionChange(section)} className="text-left text-gray-400 transition-colors hover:text-white">{label}</button>
               ))}
             </div>
