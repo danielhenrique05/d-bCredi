@@ -13,6 +13,7 @@ import type { Imovel } from './types';
 import AdminCartas from './admin/AdminCartas';
 import AdminImoveis from './admin/AdminImoveis';
 import AdminHistorico from './admin/AdminHistorico';
+import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
@@ -249,6 +250,7 @@ function App() {
       <Routes>
         {/* Rotas Públicas */}
         <Route path="/" element={<PublicSite />} />
+        <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade/>} />
         
         {/* Login do Admin */}
         <Route path="/admin" element={<AdminLogin />} />
