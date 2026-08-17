@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, HeartHandshake, MessageCircle, Target, UsersRound } from 'lucide-react';
+import ScrollReveal from './ScrollReveal';
 
 const valores = [
   'Honestidade',
@@ -16,13 +17,13 @@ const About: React.FC = () => {
   return (
     <section className="bg-gray-50 py-20">
       <div className="container mx-auto px-4">
-        <div className="mx-auto mb-16 max-w-3xl text-center">
+        <ScrollReveal className="mx-auto mb-16 max-w-3xl text-center">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.24em] text-blue-600">Sobre a d&b Credi</p>
           <h2 className="mb-4 text-4xl font-bold text-gray-800">Crédito com propósito, confiança e proximidade</h2>
           <p className="text-xl text-gray-600">O crédito que você precisa para transformar planos em conquistas.</p>
-        </div>
+        </ScrollReveal>
 
-        <div className="mb-20 grid items-center gap-12 lg:grid-cols-2">
+        <ScrollReveal delay={100} className="mb-20 grid items-center gap-12 lg:grid-cols-2">
           <img
             src="https://images.pexels.com/photos/3184306/pexels-photo-3184306.jpeg?auto=compress&cs=tinysrgb&w=1000&h=700&fit=crop"
             alt="Atendimento próximo e humano da d&b Credi"
@@ -40,9 +41,9 @@ const About: React.FC = () => {
               Mais do que operações financeiras, construímos relacionamentos baseados na confiança, credibilidade e compromisso com os resultados dos nossos clientes.
             </p>
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="mb-16 grid gap-8 lg:grid-cols-2">
+        <ScrollReveal delay={180} className="mb-16 grid gap-8 lg:grid-cols-2">
           <article className="rounded-2xl bg-white p-8 shadow-md">
             <Target className="mb-5 h-12 w-12 text-blue-600" />
             <h3 className="mb-3 text-2xl font-bold text-gray-800">Missão</h3>
@@ -57,9 +58,9 @@ const About: React.FC = () => {
               Ser a empresa mais lembrada da região quando o assunto for planejamento financeiro, crédito e consórcios, construindo relacionamentos duradouros baseados na confiança.
             </p>
           </article>
-        </div>
+        </ScrollReveal>
 
-        <div className="mb-16 rounded-3xl bg-blue-700 p-8 text-white shadow-xl lg:p-12">
+        <ScrollReveal delay={240} className="mb-16 rounded-3xl bg-blue-700 p-8 text-white shadow-xl lg:p-12">
           <div className="mb-8 flex items-center gap-4">
             <HeartHandshake className="h-11 w-11 text-yellow-300" />
             <div>
@@ -75,9 +76,9 @@ const About: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="rounded-3xl border border-blue-100 bg-white p-8 text-center shadow-sm">
+        <ScrollReveal delay={300} className="rounded-3xl border border-blue-100 bg-white p-8 text-center shadow-sm">
           <MessageCircle className="mx-auto mb-4 h-12 w-12 text-green-600" />
           <h3 className="mb-3 text-2xl font-bold text-gray-800">Vamos conversar?</h3>
           <p className="mb-6 text-gray-600">Conte com a d&b Credi para planejar seu próximo passo com segurança.</p>
@@ -89,7 +90,7 @@ const About: React.FC = () => {
           >
             <MessageCircle className="h-5 w-5" /> WhatsApp +55 49 9910-3430
           </a>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

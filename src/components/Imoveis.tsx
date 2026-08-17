@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Bath, Bed, Car, MapPin, Phone, Search, Square } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase';
 import type { Imovel } from '../types';
+import ScrollReveal from './ScrollReveal';
 
 const FALLBACK_IMAGE =
   'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
@@ -81,6 +82,7 @@ const Imoveis: React.FC<ImoveisProps> = ({ onSelectImovel }) => {
   return (
     <section className="bg-gray-50 py-20">
       <div className="container mx-auto px-4">
+        <ScrollReveal>
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-4xl font-bold text-gray-800">Imoveis a Venda</h2>
           <p className="mx-auto max-w-3xl text-xl text-gray-600">
@@ -189,6 +191,7 @@ const Imoveis: React.FC<ImoveisProps> = ({ onSelectImovel }) => {
             )}
           </div>
         )}
+        </ScrollReveal>
       </div>
     </section>
   );

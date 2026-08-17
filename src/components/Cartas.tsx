@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Home, Car, Eye, Filter, X, CheckCircle, Info } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase'; // Garanta que o caminho para o seu cliente do supabase está correto
+import ScrollReveal from './ScrollReveal';
+
 const supabase = getSupabaseClient()
 
 interface Carta {
@@ -92,6 +94,7 @@ const CartasContempladas: React.FC = () => {
   return (
     <section className="py-20 bg-gray-50 min-h-screen relative">
       <div className="container mx-auto px-4 max-w-7xl">
+        <ScrollReveal>
         <div className="mb-12">
           <h2 className="text-4xl font-bold text-gray-800 mb-2 uppercase">Cartas <span className="border-b-4 border-blue-600 pb-1">Contempladas</span></h2>
           <p className="text-gray-600 mt-4">
@@ -268,6 +271,7 @@ const CartasContempladas: React.FC = () => {
             </table>
           )}
         </div>
+        </ScrollReveal>
       </div>
 
       {/* Modal / Janelinha de Detalhes */}

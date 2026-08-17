@@ -1,6 +1,7 @@
 import React from 'react';
 import { CreditCard, Users, TrendingUp, Building  } from 'lucide-react';
 import { creditProducts } from '../data/creditProducts';
+import ScrollReveal from './ScrollReveal';
 
 interface ProductsProps {
   onSectionChange: (section: string) => void;
@@ -25,14 +26,14 @@ const Products: React.FC<ProductsProps> = ({ onSectionChange }) => {
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <ScrollReveal className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">Nossas Linhas de Crédito</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Oferecemos soluções financeiras personalizadas para cada perfil e necessidade
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <ScrollReveal delay={120} className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {creditProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
               <div className="p-8">
@@ -96,9 +97,9 @@ const Products: React.FC<ProductsProps> = ({ onSectionChange }) => {
               </div>
             </div>
           ))}
-        </div>
+        </ScrollReveal>
 
-        <div className="bg-blue-50 rounded-lg p-8">
+        <ScrollReveal delay={220} className="bg-blue-50 rounded-lg p-8">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Precisa de ajuda para escolher?</h3>
             <p className="text-gray-600 mb-6">
@@ -121,7 +122,7 @@ const Products: React.FC<ProductsProps> = ({ onSectionChange }) => {
               </a>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

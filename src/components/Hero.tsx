@@ -1,31 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, HeartHandshake, MessageCircle, ShieldCheck, Target, TrendingUp } from 'lucide-react';
+import {
+  ArrowRight,
+  HeartHandshake,
+  MessageCircle,
+  ShieldCheck,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
+import ScrollReveal from './ScrollReveal';
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
 }
 
 const vantagens = [
-  {
-    title: '9 anos de história',
-    description: 'Ajudando pessoas a conquistar seus objetivos.',
-    icon: TrendingUp,
-  },
-  {
-    title: 'Atendimento humano',
-    description: 'Próximo, transparente e comprometido.',
-    icon: HeartHandshake,
-  },
-  {
-    title: 'Crédito consciente',
-    description: 'Segurança para cada decisão financeira.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Consórcio planejado',
-    description: 'Estratégia para realizar novos planos.',
-    icon: Target,
-  },
+  { title: '9 anos de história', description: 'Ajudando pessoas a conquistar seus objetivos.', icon: TrendingUp },
+  { title: 'Atendimento humano', description: 'Próximo, transparente e comprometido.', icon: HeartHandshake },
+  { title: 'Crédito consciente', description: 'Segurança para cada decisão financeira.', icon: ShieldCheck },
+  { title: 'Consórcio planejado', description: 'Estratégia para realizar novos planos.', icon: Target },
 ];
 
 const palavrasAnimadas = ['conquistas', 'realidade', 'sucesso', 'oportunidades'];
@@ -37,13 +29,8 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
 
   useEffect(() => {
     const palavraAtual = palavrasAnimadas[indicePalavra];
-    let intervalo = apagando ? 45 : 90;
-
-    if (!apagando && palavraDigitada === palavraAtual) {
-      intervalo = 1500;
-    } else if (apagando && palavraDigitada === '') {
-      intervalo = 280;
-    }
+    const velocidade = apagando ? 45 : 90;
+    const espera = !apagando && palavraDigitada === palavraAtual ? 1500 : apagando && !palavraDigitada ? 280 : velocidade;
 
     const timer = window.setTimeout(() => {
       if (!apagando && palavraDigitada === palavraAtual) {
@@ -51,7 +38,7 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
         return;
       }
 
-      if (apagando && palavraDigitada === '') {
+      if (apagando && !palavraDigitada) {
         setApagando(false);
         setIndicePalavra((indice) => (indice + 1) % palavrasAnimadas.length);
         return;
@@ -60,20 +47,20 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
       setPalavraDigitada((palavra) =>
         apagando ? palavra.slice(0, -1) : palavraAtual.slice(0, palavra.length + 1)
       );
-    }, intervalo);
+    }, espera);
 
     return () => window.clearTimeout(timer);
   }, [apagando, indicePalavra, palavraDigitada]);
 
   return (
-    <section className="relative isolate overflow-hidden bg-gradient-to-br from-[#0c2a7a] via-[#103bb3] to-[#0a1e52] py-20 text-white lg:py-28">
+    <section className="relative isolate flex min-h-[calc(100vh-120px)] items-center overflow-hidden bg-gradient-to-br from-[#0c2a7a] via-[#103bb3] to-[#0a1e52] py-16 text-white lg:py-20">
       <div className="pointer-events-none absolute -left-32 -top-40 h-96 w-96 rounded-full bg-blue-300/30 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 right-0 h-[30rem] w-[30rem] rounded-full bg-yellow-300/15 blur-3xl" />
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-4">
         <div className="grid items-center gap-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
-          <div className="max-w-3xl">
+          <ScrollReveal className="max-w-3xl">
             <span className="mb-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-blue-50 backdrop-blur-md">
               D&B CREDI
             </span>
@@ -97,9 +84,7 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-7 py-4 font-bold text-blue-950 shadow-lg shadow-yellow-400/20 transition-all hover:-translate-y-0.5 hover:bg-yellow-300"
               >
-                <MessageCircle className="h-5 w-5" />
-                Falar no WhatsApp
-                <ArrowRight className="h-5 w-5" />
+                <MessageCircle className="h-5 w-5" /> Falar no WhatsApp <ArrowRight className="h-5 w-5" />
               </a>
               <button
                 type="button"
@@ -109,9 +94,9 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
                 Conhecer soluções
               </button>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <ScrollReveal delay={140} className="grid gap-4 sm:grid-cols-2">
             {vantagens.map(({ title, description, icon: Icon }) => (
               <article
                 key={title}
@@ -124,7 +109,7 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
                 <p className="text-sm leading-relaxed text-blue-100">{description}</p>
               </article>
             ))}
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>
