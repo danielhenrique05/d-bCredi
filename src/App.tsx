@@ -13,8 +13,8 @@ import type { Imovel } from './types';
 import AdminCartas from './admin/AdminCartas';
 import AdminImoveis from './admin/AdminImoveis';
 import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
-import NossasSolucoes from './components/nossassolucoes';
 import Avaliacoes from './components/Avaliacoes';
+import NossasSolucoes from './components/nossassolucoes';
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
