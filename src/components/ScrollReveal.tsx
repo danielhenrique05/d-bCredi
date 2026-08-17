@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { useScrollReveal } from '../hooks/Usescrollreveal';
+import { useScrollReveal } from '../hooks/usescrollreveal';
+
 
 interface ScrollRevealProps {
   children: ReactNode;
