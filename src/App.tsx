@@ -1,5 +1,4 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { BarChart3, Building2, FileCog, Users } from 'lucide-react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -12,9 +11,11 @@ import ImovelDetalhes from './components/ImovelDetalhes';
 import type { Imovel } from './types';
 import AdminCartas from './admin/AdminCartas';
 import AdminImoveis from './admin/AdminImoveis';
+import AdminHistorico from './admin/AdminHistorico';
 import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
 import Avaliacoes from './components/Avaliacoes';
 import NossasSolucoes from './components/nossassolucoes';
+import AdminDashboardHome from './admin/AdminDashboardHome';
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
@@ -78,33 +79,6 @@ const PublicSite = () => {
   );
 };
 
-const AdminDashboardHome = () => {
-  const stats = [
-    { label: 'Usuarios ativos', value: '128', icon: Users },
-    { label: 'Fluxos em analise', value: '24', icon: FileCog },
-    { label: 'Operacoes do mes', value: '312', icon: BarChart3 },
-    { label: 'Imoveis publicados', value: '18', icon: Building2 },
-  ];
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      {stats.map(({ label, value, icon: Icon }) => (
-        <article
-          key={label}
-          className="rounded-[24px] border border-blue-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-        >
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
-            <Icon className="h-5 w-5" />
-          </div>
-          <p className="text-sm text-gray-500">{label}</p>
-          <strong className="mt-2 block text-3xl font-semibold tracking-tight text-gray-900">
-            {value}
-          </strong>
-        </article>
-      ))}
-    </div>
-  );
-};
 
 function App() {
   return (
@@ -121,11 +95,14 @@ function App() {
         <Route path="/admin" element={<AdminLogin />} />
         
         <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboardHome />} />
-          
+          <Route path='/admin/dashboard' element={<AdminDashboardHome/>}/>
+
           <Route path="/admin/cartas" element={<AdminCartas />} />
           
           <Route path="/admin/imoveis" element={<AdminImoveis />} />
+
+          <Route path="/admin/historico" element={<AdminHistorico />} />
+          
         </Route>
 
         <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
