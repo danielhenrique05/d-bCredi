@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react';
-import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard, Building } from 'lucide-react';
-import { Navigate, Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import type { Session } from '@supabase/supabase-js';
-import { getSupabaseClient, hasSupabaseConfig } from '../lib/supabase';
+import { useEffect, useState } from "react";
+import {
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  ShieldCheck,
+  CreditCard,
+  Building,
+} from "lucide-react";
+import {
+  Navigate,
+  Outlet,
+  useNavigate,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import type { Session } from "@supabase/supabase-js";
+import { getSupabaseClient, hasSupabaseConfig } from "../lib/supabase";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -44,7 +57,7 @@ const AdminLayout = () => {
   const handleLogout = async () => {
     const supabase = getSupabaseClient();
     await supabase.auth.signOut();
-    navigate('/admin', { replace: true });
+    navigate("/admin", { replace: true });
   };
 
   if (isLoading) {
@@ -74,14 +87,20 @@ const AdminLayout = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-700">
                 Ambiente Seguro
               </p>
-              <h1 className="text-lg font-semibold text-gray-800">Admin Dashboard</h1>
+              <h1 className="text-lg font-semibold text-gray-800">
+                Admin Dashboard
+              </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-2 text-right sm:block">
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-500">Usuário</p>
-              <p className="text-sm font-medium text-gray-700">{session.user.email}</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-blue-500">
+                Usuário
+              </p>
+              <p className="text-sm font-medium text-gray-700">
+                {session.user.email}
+              </p>
             </div>
 
             <button
@@ -103,9 +122,12 @@ const AdminLayout = () => {
               <LayoutDashboard className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Gestão administrativa</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Gestão administrativa
+              </h2>
               <p className="mt-2 max-w-2xl text-sm text-blue-100">
-                Seu acesso foi validado. Use este menu para navegar entre os módulos do sistema.
+                Seu acesso foi validado. Use este menu para navegar entre os
+                módulos do sistema.
               </p>
             </div>
           </div>
@@ -117,9 +139,9 @@ const AdminLayout = () => {
             <Link
               to="/admin/dashboard"
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
-                location.pathname === '/admin/dashboard'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                location.pathname === "/admin/dashboard"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
               }`}
             >
               <LayoutDashboard className="h-4 w-4" />
@@ -129,9 +151,9 @@ const AdminLayout = () => {
             <Link
               to="/admin/cartas"
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
-                location.pathname === '/admin/cartas'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                location.pathname === "/admin/cartas"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
               }`}
             >
               <CreditCard className="h-4 w-4" />
@@ -141,13 +163,25 @@ const AdminLayout = () => {
             <Link
               to="/admin/imoveis"
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
-                location.pathname === '/admin/imoveis'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                  : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                location.pathname === "/admin/imoveis"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
               }`}
             >
               <Building className="h-4 w-4" />
               Imóveis
+            </Link>
+
+            <Link
+              to="/admin/historico"
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                location.pathname === "/admin/historico"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Building className="h-4 w-4" />
+              Histórico
             </Link>
           </div>
         </nav>
