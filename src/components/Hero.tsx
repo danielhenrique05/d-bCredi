@@ -79,7 +79,7 @@ const Hero: React.FC<HeroProps> = ({ onSectionChange }) => {
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <a
-                href="https://wa.me/554999103430"
+                href="https://wa.me/5549999152053"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-7 py-4 font-bold text-blue-950 shadow-lg shadow-yellow-400/20 transition-all hover:-translate-y-0.5 hover:bg-yellow-300"

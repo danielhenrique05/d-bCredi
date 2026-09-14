@@ -83,7 +83,7 @@ const About: React.FC = () => {
           <h3 className="mb-3 text-2xl font-bold text-gray-800">Vamos conversar?</h3>
           <p className="mb-6 text-gray-600">Conte com a d&b Credi para planejar seu próximo passo com segurança.</p>
           <a
-            href="https://wa.me/554999103430"
+            href="https://wa.me/5549999152053"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-700"

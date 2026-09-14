@@ -109,7 +109,7 @@ const NossasSolucoes: React.FC<NossasSolucoesProps> = ({ onSectionChange }) => {
               humano, sem robô e sem letra miúda.
             </p>
             <a
-              href="https://wa.me/554999103430"
+              href="https://wa.me/5549999152053"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-yellow-400 px-6 py-3 font-bold text-blue-950 transition-all hover:-translate-y-0.5 hover:bg-yellow-300"

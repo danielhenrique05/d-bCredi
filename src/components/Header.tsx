@@ -10,9 +10,9 @@ interface HeaderProps {
 const menuItems = [
   { id: 'home', label: 'Início' },
   { id: 'about', label: 'Sobre Nós' },
-  { id: 'products', label: 'Consignado e Consórcios' },
+  { id: 'products', label: 'Consórcios' },
   { id: 'cartas', label: 'Cartas Contempladas' },
-  { id: 'imoveis', label: 'Imóveis' },
+  { id: 'imoveis', label: 'Imóveis à venda' },
 ];
 
 const Header: React.FC<HeaderProps> = ({ currentSection, onSectionChange }) => {
@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ currentSection, onSectionChange }) => {
           <a href="tel:+554999103430" className="flex items-center gap-2 hover:text-yellow-200">
             <Phone className="h-4 w-4" /> +55 49 9910-3430
           </a>
-          <a href="https://wa.me/554999103430" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-yellow-200">
+          <a href="https://wa.me/5549999152053" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-yellow-200">
             <MessageCircle className="h-4 w-4" /> Atendimento via WhatsApp
           </a>
         </div>

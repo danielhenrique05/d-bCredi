@@ -349,7 +349,7 @@ export default function PoliticaDePrivacidade() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <a
-              href="https://wa.me/554999103430"
+              href="https://wa.me/5549999152053"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-medium text-white transition-colors hover:bg-green-700"

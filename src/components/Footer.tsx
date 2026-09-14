@@ -93,7 +93,7 @@ const Footer: React.FC<FooterProps> = ({ onSectionChange }) => {
                 planos.
               </p>
               <a
-                href="https://wa.me/554999103430"
+                href="https://wa.me/5549999152053"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition-colors hover:bg-green-700"
