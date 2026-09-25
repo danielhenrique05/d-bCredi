@@ -5,6 +5,15 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api/contemplados': {
+        target: 'https://fragaebitelloconsorcios.com.br',
+        changeOrigin: true,
+        rewrite: () => '/api/json/contemplados',
+      },
+    },
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

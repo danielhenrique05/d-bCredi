@@ -1,29 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Car, Eye, Filter, X, CheckCircle, Info } from 'lucide-react';
-import { getSupabaseClient } from '../lib/supabase'; // Garanta que o caminho para o seu cliente do supabase está correto
+import { Home, Car, Eye, Filter, X, CheckCircle, Info, AlertCircle } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
 
-const supabase = getSupabaseClient()
-
-interface Carta {
+interface CartaContemplada {
   id: number;
-  tipo: 'imovel' | 'veiculo';
-  numero: string;
-  credito: number;
-  entrada: number;
+  categoria: string;
+  valor_credito_fmt: string;
+  entrada_fmt: string;
   parcelas: number;
-  valorParcela: number; // Certifique-se de que no seu banco está "valorParcela" ou "valor_parcela"
-  admin: string;
-  status: 'disponivel' | 'reservado';
+  valor_parcela_fmt: string;
+  administradora: string;
+  administradora_img?: string;
+  reserva: string;
 }
+
+const API_URL = '/api/contemplados';
+
+const converterMoeda = (valor: string) => Number(
+  valor.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+);
 
 const formatarMoeda = (valor: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 };
 
+const estaDisponivel = (carta: CartaContemplada) =>
+  carta.reserva.toLowerCase() !== 'reservado';
+
+const ehVeiculo = (categoria: string) => {
+  const categoriaNormalizada = categoria.toLowerCase();
+  return categoriaNormalizada === 'veículo' || categoriaNormalizada === 'veiculo';
+};
+
 const CartasContempladas: React.FC = () => {
-  const [cartas, setCartas] = useState<Carta[]>([]);
+  const [cartas, setCartas] = useState<CartaContemplada[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [erro, setErro] = useState<string | null>(null);
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'imovel' | 'veiculo'>('todos');
   const [exibirDisponiveis, setExibirDisponiveis] = useState(true);
   const [exibirReservadas, setExibirReservadas] = useState(true);
@@ -33,36 +45,22 @@ const CartasContempladas: React.FC = () => {
   const [filtroCredito, setFiltroCredito] = useState<number>(1000000); 
 
   // Estado para o Modal (Janelinha)
-  const [cartaSelecionada, setCartaSelecionada] = useState<Carta | null>(null);
+  const [cartaSelecionada, setCartaSelecionada] = useState<CartaContemplada | null>(null);
 
-  // Buscar cartas do Supabase
   useEffect(() => {
     const buscarCartas = async () => {
       setLoading(true);
+      setErro(null);
       try {
-        const { data, error } = await supabase
-          .from('cartas_contempladas')
-          .select('*');
+        const resposta = await fetch(API_URL);
+        if (!resposta.ok) throw new Error(`A API respondeu com status ${resposta.status}.`);
 
-        if (error) throw error;
-        
-        if (data) {
-          // Mapeia caso as colunas do banco usem snake_case (ex: valor_parcela para valorParcela)
-          const cartasFormatadas = data.map((item: any) => ({
-            id: item.id,
-            tipo: item.tipo,
-            numero: item.numero,
-            credito: Number(item.credito),
-            entrada: Number(item.entrada),
-            parcelas: Number(item.parcelas),
-            valorParcela: Number(item.valor_parcela || item.valorParcela),
-            admin: item.admin,
-            status: item.status
-          }));
-          setCartas(cartasFormatadas);
-        }
-      } catch (err: any) {
-        console.error('Erro ao buscar cartas do banco:', err.message);
+        const dados: CartaContemplada[] = await resposta.json();
+        setCartas(Array.isArray(dados) ? dados : []);
+      } catch (err) {
+        const mensagem = err instanceof Error ? err.message : 'Não foi possível carregar as cartas.';
+        console.error('Erro ao buscar cartas contempladas:', mensagem);
+        setErro('Não foi possível carregar as cartas contempladas. Tente novamente.');
       } finally {
         setLoading(false);
       }
@@ -73,21 +71,27 @@ const CartasContempladas: React.FC = () => {
 
   // Filtragem dos dados
   const cartasFiltradas = cartas.filter(carta => {
-    const passaFiltroTipo = filtroTipo === 'todos' || carta.tipo === filtroTipo;
+    const categoriaNormalizada = carta.categoria.toLowerCase();
+    const tipo = ehVeiculo(carta.categoria)
+      ? 'veiculo'
+      : categoriaNormalizada === 'imóvel' || categoriaNormalizada === 'imovel'
+        ? 'imovel'
+        : 'outro';
+    const passaFiltroTipo = filtroTipo === 'todos' || tipo === filtroTipo;
     const passaFiltroStatus = 
-      (carta.status === 'disponivel' && exibirDisponiveis) || 
-      (carta.status === 'reservado' && exibirReservadas);
+      (estaDisponivel(carta) && exibirDisponiveis) ||
+      (!estaDisponivel(carta) && exibirReservadas);
     
     // Filtra cartas com crédito menor ou igual ao selecionado
-    const passaFiltroCredito = carta.credito <= filtroCredito;
+    const passaFiltroCredito = converterMoeda(carta.valor_credito_fmt) <= filtroCredito;
     
     return passaFiltroTipo && passaFiltroStatus && passaFiltroCredito;
   });
 
   // Função para chamar o WhatsApp
-  const handleNegociar = (numero: string, valor: number) => {
+  const handleNegociar = (carta: CartaContemplada) => {
     const telefone = "554999103430";
-    const texto = `Olá! Tenho interesse em negociar a carta contemplada Nº ${numero} no valor de ${formatarMoeda(valor)}.`;
+    const texto = `Olá! Tenho interesse em negociar a carta contemplada Nº ${carta.id} no valor de ${carta.valor_credito_fmt}.`;
     window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`, '_blank');
   };
 
@@ -193,6 +197,11 @@ const CartasContempladas: React.FC = () => {
             <div className="p-12 text-center text-gray-500">
               <p className="animate-pulse">Carregando cartas contempladas...</p>
             </div>
+          ) : erro ? (
+            <div className="p-12 text-center text-red-600">
+              <AlertCircle className="w-10 h-10 mx-auto mb-3" />
+              <p className="font-medium">{erro}</p>
+            </div>
           ) : (
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
@@ -211,7 +220,7 @@ const CartasContempladas: React.FC = () => {
                   cartasFiltradas.map((carta) => (
                     <tr key={carta.id} className="hover:bg-blue-50/50 transition-colors">
                       <td className="p-4 text-center">
-                        {carta.tipo === 'imovel' ? (
+                        {!ehVeiculo(carta.categoria) ? (
                           <div className="bg-blue-100 p-2 rounded-lg inline-block">
                             <Home className="w-5 h-5 text-blue-700" />
                           </div>
@@ -221,14 +230,19 @@ const CartasContempladas: React.FC = () => {
                           </div>
                         )}
                       </td>
-                      <td className="p-4 text-center font-bold text-gray-700">{carta.numero}</td>
-                      <td className="p-4 font-extrabold text-blue-700 text-lg">{formatarMoeda(carta.credito)}</td>
-                      <td className="p-4 text-gray-700 font-medium">{formatarMoeda(carta.entrada)}</td>
+                      <td className="p-4 text-center font-bold text-gray-700">#{carta.id}</td>
+                      <td className="p-4 font-extrabold text-blue-700 text-lg">{carta.valor_credito_fmt}</td>
+                      <td className="p-4 text-gray-700 font-medium">{carta.entrada_fmt}</td>
                       <td className="p-4 text-gray-600 text-sm">
-                        <span className="font-bold text-gray-800">{carta.parcelas}x</span> de {formatarMoeda(carta.valorParcela)}
+                        <span className="font-bold text-gray-800">{carta.parcelas}x</span> de {carta.valor_parcela_fmt}
                       </td>
                       <td className="p-4 text-center text-gray-500 font-medium text-sm">
-                        {carta.admin}
+                        <div className="flex items-center justify-center gap-2">
+                          {carta.administradora_img && (
+                            <img src={carta.administradora_img} alt="" className="w-8 h-8 object-contain rounded" />
+                          )}
+                          <span>{carta.administradora}</span>
+                        </div>
                       </td>
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center space-x-2">
@@ -239,9 +253,9 @@ const CartasContempladas: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          {carta.status === 'disponivel' ? (
+                          {estaDisponivel(carta) ? (
                             <button 
-                              onClick={() => handleNegociar(carta.numero, carta.credito)}
+                              onClick={() => handleNegociar(carta)}
                               className="w-full bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors shadow-sm"
                             >
                               Negociar
@@ -249,7 +263,7 @@ const CartasContempladas: React.FC = () => {
                           ) : (
                             <button 
                               disabled
-                              className="w-full bg-gray-100 text-gray-500 px-3 py-2 rounded-lg font-bold text-sm cursor-not-allowed border border-gray-200"
+                              className="w-full bg-amber-100 text-amber-800 px-3 py-2 rounded-lg font-bold text-sm cursor-not-allowed border border-amber-200"
                             >
                               Reservada
                             </button>
@@ -282,12 +296,12 @@ const CartasContempladas: React.FC = () => {
             <div className="bg-blue-700 p-5 flex justify-between items-center text-white">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-lg">
-                  {cartaSelecionada.tipo === 'imovel' ? <Home className="w-6 h-6" /> : <Car className="w-6 h-6" />}
+                  {ehVeiculo(cartaSelecionada.categoria) ? <Car className="w-6 h-6" /> : <Home className="w-6 h-6" />}
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl leading-tight">Carta #{cartaSelecionada.numero}</h3>
+                  <h3 className="font-bold text-xl leading-tight">Carta #{cartaSelecionada.id}</h3>
                   <p className="text-blue-200 text-sm">
-                    {cartaSelecionada.tipo === 'imovel' ? 'Consórcio de Imóvel' : 'Consórcio de Veículo'} • {cartaSelecionada.admin}
+                    {cartaSelecionada.categoria} • {cartaSelecionada.administradora}
                   </p>
                 </div>
               </div>
@@ -301,12 +315,12 @@ const CartasContempladas: React.FC = () => {
 
             <div className="p-6">
               <div className="flex items-center gap-2 mb-6">
-                {cartaSelecionada.status === 'disponivel' ? (
+                {estaDisponivel(cartaSelecionada) ? (
                   <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-green-200">
                     <CheckCircle className="w-4 h-4" /> Disponível para Negociação
                   </span>
                 ) : (
-                  <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-gray-200">
+                  <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 border border-amber-200">
                     <Info className="w-4 h-4" /> Carta Reservada
                   </span>
                 )}
@@ -315,12 +329,12 @@ const CartasContempladas: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <p className="text-xs text-gray-500 font-bold uppercase mb-1">Valor do Crédito</p>
-                  <p className="font-black text-blue-700 text-xl">{formatarMoeda(cartaSelecionada.credito)}</p>
+                  <p className="font-black text-blue-700 text-xl">{cartaSelecionada.valor_credito_fmt}</p>
                 </div>
                 
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <p className="text-xs text-gray-500 font-bold uppercase mb-1">Valor da Entrada</p>
-                  <p className="font-bold text-gray-800 text-xl">{formatarMoeda(cartaSelecionada.entrada)}</p>
+                  <p className="font-bold text-gray-800 text-xl">{cartaSelecionada.entrada_fmt}</p>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -330,14 +344,14 @@ const CartasContempladas: React.FC = () => {
 
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <p className="text-xs text-gray-500 font-bold uppercase mb-1">Valor da Parcela</p>
-                  <p className="font-bold text-gray-800 text-lg">{formatarMoeda(cartaSelecionada.valorParcela)}</p>
+                  <p className="font-bold text-gray-800 text-lg">{cartaSelecionada.valor_parcela_fmt}</p>
                 </div>
               </div>
 
-              {cartaSelecionada.status === 'disponivel' ? (
+              {estaDisponivel(cartaSelecionada) ? (
                 <button 
                   onClick={() => {
-                    handleNegociar(cartaSelecionada.numero, cartaSelecionada.credito);
+                    handleNegociar(cartaSelecionada);
                     setCartaSelecionada(null);
                   }}
                   className="w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors shadow-md flex items-center justify-center gap-2"
