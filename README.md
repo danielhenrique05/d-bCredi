@@ -49,6 +49,7 @@ A tabela de `imoveis` no Supabase possui a seguinte estrutura de colunas otimiza
 | `imagem_url` | `text` | URL da imagem principal (Capa) |
 | `imagens` | `text[]` | Array de URLs das fotos (Galeria) |
 | `destaque` | `boolean` | Define se o imóvel aparece na home (`true`/`false`) |
+| `user_id` | `uuid` | Usuário que cadastrou o imóvel e pode gerenciá-lo |
 | `criado_em` | `timestamp` | Data de criação automática do registro |
 
 ---

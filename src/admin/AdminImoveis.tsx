@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Edit2, Image as ImageIcon, Loader2, MapPin, Plus, Star, Trash2, X } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase';
 import type { Imovel } from '../types';
+import { obterUsuarioAtual, type UsuarioAtual } from '../services/usuarios';
 
 type ImovelFormData = Omit<Imovel, 'id' | 'imagem_url'>;
 
@@ -45,6 +47,7 @@ const formatarMoeda = (valor: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 
 const AdminImoveis = () => {
+  const usuarioPainel = useOutletContext<UsuarioAtual>();
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imovelEditando, setImovelEditando] = useState<Imovel | null>(null);
@@ -52,17 +55,14 @@ const AdminImoveis = () => {
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<ImovelFormData>(criarFormData);
 
-  const carregarImoveis = async () => {
+  const carregarImoveis = useCallback(async () => {
     setLoading(true);
-
-    const { data, error } = await getSupabaseClient()
-      .from('imoveis')
-      .select('*')
-      .order('destaque', { ascending: false });
-
-    if (error) {
-      alert(`Erro ao carregar imoveis: ${error.message}`);
-    } else {
+    try {
+      const usuario = await obterUsuarioAtual();
+      let query = getSupabaseClient().from('imoveis').select('*');
+      if (!usuario.administrador) query = query.eq('user_id', usuario.id);
+      const { data, error } = await query.order('destaque', { ascending: false });
+      if (error) throw error;
       setImoveis(
         (data ?? []).map((item) => ({
           id: String(item.id),
@@ -81,14 +81,17 @@ const AdminImoveis = () => {
           destaque: Boolean(item.destaque),
         }))
       );
+    } catch (error) {
+      setImoveis([]);
+      alert(`Erro ao carregar imóveis: ${error instanceof Error ? error.message : 'Não foi possível carregar o catálogo.'}`);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     void carregarImoveis();
-  }, []);
+  }, [carregarImoveis]);
 
   const handleNovo = () => {
     setImovelEditando(null);
@@ -117,32 +120,32 @@ const AdminImoveis = () => {
 
   const handleExcluir = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir este imovel?')) return;
-
-    const { error } = await getSupabaseClient().from('imoveis').delete().eq('id', id);
-
-    if (error) {
-      alert(`Erro ao deletar: ${error.message}`);
-      return;
+    try {
+      const usuario = await obterUsuarioAtual();
+      let query = getSupabaseClient().from('imoveis').delete().eq('id', id);
+      if (!usuario.administrador) query = query.eq('user_id', usuario.id);
+      const { error } = await query.select('id').single();
+      if (error) throw new Error('Não foi possível excluir. O imóvel pode não existir ou você não tem permissão.');
+      setImoveis((current) => current.filter((imovel) => imovel.id !== id));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao excluir imóvel.');
     }
-
-    setImoveis((current) => current.filter((imovel) => imovel.id !== id));
   };
 
   const handleToggleDestaque = async (imovel: Imovel) => {
-    const destaque = !imovel.destaque;
-    const { error } = await getSupabaseClient()
-      .from('imoveis')
-      .update({ destaque })
-      .eq('id', imovel.id);
-
-    if (error) {
-      alert(`Erro ao atualizar destaque: ${error.message}`);
-      return;
+    try {
+      const usuario = await obterUsuarioAtual();
+      const destaque = !imovel.destaque;
+      let query = getSupabaseClient().from('imoveis').update({ destaque }).eq('id', imovel.id);
+      if (!usuario.administrador) query = query.eq('user_id', usuario.id);
+      const { error } = await query.select('id').single();
+      if (error) throw new Error('Não foi possível alterar o destaque. Verifique sua permissão e tente novamente.');
+      setImoveis((current) =>
+        current.map((item) => (item.id === imovel.id ? { ...item, destaque } : item))
+      );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao alterar destaque.');
     }
-
-    setImoveis((current) =>
-      current.map((item) => (item.id === imovel.id ? { ...item, destaque } : item))
-    );
   };
 
   const handleUploadFotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,22 +204,28 @@ const AdminImoveis = () => {
       destaque: formData.destaque,
     };
 
-    const query = imovelEditando
-      ? getSupabaseClient().from('imoveis').update(dadosParaSalvar).eq('id', imovelEditando.id)
-      : getSupabaseClient().from('imoveis').insert([dadosParaSalvar]);
-
-    const { error } = await query;
-
-    if (error) {
-      alert(`Erro ao salvar imovel: ${error.message}`);
-    } else {
+    try {
+      const usuario = await obterUsuarioAtual();
+      let query;
+      if (imovelEditando) {
+        query = getSupabaseClient().from('imoveis').update(dadosParaSalvar).eq('id', imovelEditando.id);
+        if (!usuario.administrador) query = query.eq('user_id', usuario.id);
+      } else {
+        query = getSupabaseClient().from('imoveis').insert([{ ...dadosParaSalvar, user_id: usuario.id }]);
+      }
+      // Confirmar uma linha evita anunciar sucesso quando a permissão recusou a alteração.
+      // O histórico é gravado pelo banco, na mesma transação desta operação.
+      const { error } = await query.select('id').single();
+      if (error) throw new Error(`Não foi possível salvar o imóvel: ${error.message}`);
       setIsModalOpen(false);
       setImovelEditando(null);
       setFormData(criarFormData());
       await carregarImoveis();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao salvar imóvel.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -224,7 +233,9 @@ const AdminImoveis = () => {
       <div className="flex flex-col items-start justify-between gap-4 border-b border-gray-100 p-6 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-xl font-bold text-gray-800">Gerenciar Imoveis</h2>
-          <p className="mt-1 text-sm text-gray-500">Adicione, edite fotos e detalhes do catalogo.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            {usuarioPainel.administrador ? 'Gerencie todos os imóveis cadastrados no sistema.' : 'Adicione e edite apenas os imóveis cadastrados por você.'}
+          </p>
         </div>
         <button
           type="button"

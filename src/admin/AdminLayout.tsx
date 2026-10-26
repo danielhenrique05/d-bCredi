@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  ShieldCheck,
-  CreditCard,
-  Building,
-} from "lucide-react";
+import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard, Building } from 'lucide-react';
 import {
   Navigate,
   Outlet,
@@ -16,6 +9,7 @@ import {
 } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseClient, hasSupabaseConfig } from "../lib/supabase";
+import { identificarUsuario } from '../services/usuarios';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -75,6 +69,8 @@ const AdminLayout = () => {
     return <Navigate to="/admin" replace />;
   }
 
+  const usuario = identificarUsuario(session.user);
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_28%),linear-gradient(135deg,_#f8fbff_0%,_#f3f7ff_100%)]">
       <header className="border-b border-blue-100/80 bg-white/90 shadow-sm backdrop-blur-xl">
@@ -99,7 +95,7 @@ const AdminLayout = () => {
                 Usuário
               </p>
               <p className="text-sm font-medium text-gray-700">
-                {session.user.email}
+                {usuario.nome || usuario.email || 'Usuário'}
               </p>
             </div>
 
@@ -185,7 +181,7 @@ const AdminLayout = () => {
             </Link>
           </div>
         </nav>
-        <Outlet />
+        <Outlet key={usuario.id} context={usuario} />
       </main>
     </div>
   );

@@ -1,81 +1,41 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarDays, Search, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { listarHistorico, type RegistroHistorico } from '../services/historico';
 
-type HistoryEntry = {
-  id: number;
-  date: string;
-  time: string;
-  user: string;
-  action: string;
-  item: string;
-  area: string;
-  details: string;
+const acoes = {
+  CREATE: 'Criou imóvel',
+  UPDATE: 'Editou imóvel',
+  DELETE: 'Excluiu imóvel',
 };
 
-const historyEntries: HistoryEntry[] = [
-  {
-    id: 1,
-    date: '27/07/2026',
-    time: '14:12',
-    user: 'admin@teste.com',
-    action: 'Editou imóvel',
-    item: 'Casa Vila Nova',
-    area: 'Imóveis',
-    details: 'Atualizou descrição, preço e fotos destacadas.',
-  },
-  {
-    id: 2,
-    date: '27/07/2026',
-    time: '13:40',
-    user: 'financeiro@empresa.com',
-    action: 'Atualizou carta',
-    item: 'Carta nº 1042',
-    area: 'Cartas',
-    details: 'Alterou status para contemplada e ajustou observações.',
-  },
-  {
-    id: 3,
-    date: '26/07/2026',
-    time: '12:15',
-    user: 'suporte@empresa.com',
-    action: 'Publicou anúncio',
-    item: 'Apartamento Jardim',
-    area: 'Imóveis',
-    details: 'Criou novo anúncio e habilitou destaque no portal.',
-  },
-  {
-    id: 4,
-    date: '26/07/2026',
-    time: '09:05',
-    user: 'marketing@empresa.com',
-    action: 'Editou carta',
-    item: 'Carta nº 1008',
-    area: 'Cartas',
-    details: 'Atualizou dados cadastrais e anexou nova documentação.',
-  },
-];
-
 const AdminHistorico = () => {
-  const [selectedDate, setSelectedDate] = useState('todos');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [historyEntries, setHistoryEntries] = useState<RegistroHistorico[]>([]);
+  const [pagina, setPagina] = useState(0);
+  const [temMais, setTemMais] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState('');
+  const [atualizacao, setAtualizacao] = useState(0);
 
-  const uniqueDates = useMemo(() => {
-    return Array.from(new Set(historyEntries.map((entry) => entry.date))).sort((a, b) => {
-      const [dayA, monthA, yearA] = a.split('/').map(Number);
-      const [dayB, monthB, yearB] = b.split('/').map(Number);
-      const dateA = new Date(yearA, monthA - 1, dayA).getTime();
-      const dateB = new Date(yearB, monthB - 1, dayB).getTime();
-      return dateB - dateA;
-    });
-  }, []);
-
-  const filteredEntries = useMemo(() => {
-    if (selectedDate === 'todos') {
-      return historyEntries;
-    }
-
-    return historyEntries.filter((entry) => entry.date === selectedDate);
-  }, [selectedDate]);
+  useEffect(() => {
+    let ativo = true;
+    setLoading(true);
+    setErro('');
+    setHistoryEntries([]);
+    setTemMais(false);
+    listarHistorico(selectedDate, pagina)
+      .then(({ registros, temMais: proximaPagina }) => {
+        if (!ativo) return;
+        setHistoryEntries(registros);
+        setTemMais(proximaPagina);
+      })
+      .catch((error: unknown) => {
+        if (ativo) setErro(error instanceof Error ? error.message : 'Erro ao carregar histórico.');
+      })
+      .finally(() => { if (ativo) setLoading(false); });
+    return () => { ativo = false; };
+  }, [selectedDate, pagina, atualizacao]);
 
   return (
     <div className="space-y-6">
@@ -116,21 +76,16 @@ const AdminHistorico = () => {
               Data da modificação
             </span>
             <div className="rounded-[20px] border border-white/20 bg-white/12 p-[2px] shadow-[0_10px_35px_rgba(15,23,42,0.15)] backdrop-blur">
-              <select
+              <input
+                type="date"
                 value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
+                onChange={(event) => { setSelectedDate(event.target.value); setPagina(0); }}
                 className="w-full rounded-[18px] border border-white/10 bg-slate-950/30 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-white/30 focus:bg-slate-950/40"
-              >
-                <option value="todos" className="bg-slate-900 text-white">
-                  Todos os registros
-                </option>
-                {uniqueDates.map((date) => (
-                  <option key={date} value={date} className="bg-slate-900 text-white">
-                    {date}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
+            <button type="button" onClick={() => { setSelectedDate(''); setPagina(0); }} className="text-left underline">
+              Todas as datas
+            </button>
           </label>
         </div>
       </section>
@@ -138,13 +93,20 @@ const AdminHistorico = () => {
       <section className="rounded-[28px] border border-blue-100 bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-center gap-2 text-sm font-medium text-blue-700">
           <Search className="h-4 w-4" />
-          {selectedDate === 'todos'
-            ? 'Exibindo todas as alterações registradas'
-            : `Mostrando alterações de ${selectedDate}`}
+          {!selectedDate
+            ? 'Alterações registradas, da mais recente para a mais antiga'
+            : `Mostrando alterações de ${selectedDate.split('-').reverse().join('/')}`}
+          <button type="button" disabled={loading} onClick={() => { setPagina(0); setAtualizacao((valor) => valor + 1); }} className="ml-auto underline disabled:opacity-50">
+            Atualizar
+          </button>
         </div>
 
+        {loading && <p role="status" className="text-sm text-gray-500">Carregando histórico...</p>}
+        {erro && <p role="alert" className="text-sm text-red-600">{erro} Use Atualizar para tentar novamente.</p>}
+        {!loading && !erro && historyEntries.length === 0 && <p className="text-sm text-gray-500">Nenhum registro encontrado para este período.</p>}
+
         <div className="space-y-3">
-          {filteredEntries.map((entry) => (
+          {historyEntries.map((entry) => (
             <article
               key={entry.id}
               className="rounded-[24px] border border-gray-200 bg-gray-50/80 p-4"
@@ -156,29 +118,37 @@ const AdminHistorico = () => {
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-gray-900">{entry.action}</p>
+                      <p className="font-semibold text-gray-900">{acoes[entry.acao]}</p>
                       <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-600 shadow-sm">
-                        {entry.area}
+                        {entry.entidade === 'imovel' ? 'Imóveis' : entry.entidade}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-gray-600">{entry.item}</p>
-                    <p className="mt-1 text-sm text-gray-500">{entry.user}</p>
-                    <p className="mt-2 text-sm text-gray-600">{entry.details}</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {entry.usuario_nome || entry.usuario_email || (entry.user_id ? 'Usuário não identificado' : 'Sistema')}
+                      {entry.usuario_nome && entry.usuario_email ? ` · ${entry.usuario_email}` : ''}
+                    </p>
+                    <p className="mt-2 text-sm text-gray-600">{entry.descricao}</p>
+                    <p className="mt-1 break-all text-xs text-gray-400">ID do imóvel: {entry.entidade_id}</p>
                   </div>
                 </div>
 
                 <div className="min-w-[140px] rounded-[20px] border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3 text-sm shadow-sm">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700">
                     <span className="h-2 w-2 rounded-full bg-blue-600" />
-                    Modificado
+                    Registrado
                   </div>
-                  <p className="mt-2 font-semibold text-gray-900">{entry.date}</p>
-                  <p className="mt-1 text-gray-600">{entry.time}</p>
+                  <p className="mt-2 font-semibold text-gray-900">{new Date(entry.criado_em).toLocaleDateString('pt-BR')}</p>
+                  <p className="mt-1 text-gray-600">{new Date(entry.criado_em).toLocaleTimeString('pt-BR')}</p>
                 </div>
               </div>
             </article>
           ))}
         </div>
+        {!erro && <div className="mt-5 flex items-center justify-end gap-4 text-sm text-blue-700">
+          <button type="button" disabled={loading || pagina === 0} onClick={() => setPagina((valor) => valor - 1)} className="disabled:opacity-40">Anterior</button>
+          <span>Página {pagina + 1}</span>
+          <button type="button" disabled={loading || !temMais} onClick={() => setPagina((valor) => valor + 1)} className="disabled:opacity-40">Próxima</button>
+        </div>}
       </section>
     </div>
   );
