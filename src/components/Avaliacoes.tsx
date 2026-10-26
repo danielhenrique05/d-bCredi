@@ -1,9 +1,10 @@
 import React from 'react';
 import { ExternalLink, Quote, Star } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import { localizacao } from '../data/localizacao';
 
 const AVALIACAO_GERAL = { nota: 4.7, total: 12 };
-const LINK_GOOGLE = 'https://www.google.com/maps/place/?q=place_id:ChIJD5QmVW9_45QRUnrHMkTjz3Q';
+const LINK_GOOGLE = localizacao.mapsUrl;
 
 const depoimentos = [
   { texto: 'Empresa maravilhosa, com um casal extremamente comprometido e honesto. Já fiz empréstimos e tenho várias linhas de consórcio. Recomendo totalmente.', autor: 'Cliente d&b Credi' },

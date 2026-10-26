@@ -13,6 +13,8 @@ import AdminImoveis from './admin/AdminImoveis';
 import AdminHistorico from './admin/AdminHistorico';
 import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
 import Avaliacoes from './components/Avaliacoes';
+import Localizacao from './components/Localizacao';
+import AgendamentoAtendimento from './components/AgendamentoAtendimento';
 import NossasSolucoes from './components/nossassolucoes';
 import AdminDashboardHome from './admin/AdminDashboardHome';
 
@@ -46,6 +48,8 @@ const PublicSite = () => {
             <Hero onSectionChange={handleSectionChange} />
             <NossasSolucoes onSectionChange={handleSectionChange} />
             <Avaliacoes />
+            <AgendamentoAtendimento />
+            <Localizacao />
           </>
         );
       case 'about':
