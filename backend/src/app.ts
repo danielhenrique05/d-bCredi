@@ -9,19 +9,22 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { usersRoutes } from './modules/usuarios/usuarios.routes.js';
 import { imoveisRoutes } from './modules/imoveis/imoveis.routes.js';
 import { historicoRoutes } from './modules/historico/historico.routes.js';
+import { contempladosRoutes } from './modules/contemplados/contemplados.routes.js';
+import type { ContempladosClient } from './modules/contemplados/contemplados.client.js';
 
-export function createApp(database: Database = pool) {
+export function createApp(database: Database = pool, contempladosClient?: ContempladosClient) {
   const app = express();
 
   app.disable('x-powered-by');
   app.set('trust proxy', authConfig.trustProxyHops);
-  app.use(['/api/auth', '/api/usuarios', '/api/imoveis', '/api/historico'], originPolicy);
+  app.use(['/api/auth', '/api/usuarios', '/api/imoveis', '/api/historico', '/api/contemplados'], originPolicy);
   app.use(express.json({ limit: '16kb' }));
   app.use('/api/health', healthRouter);
   app.use('/api/auth', authRoutes(database));
   app.use('/api/usuarios', usersRoutes(database));
   app.use('/api/imoveis', imoveisRoutes(database));
   app.use('/api/historico', historicoRoutes(database));
+  app.use('/api/contemplados', contempladosRoutes(contempladosClient));
   app.use((_request, response) => {
     response.status(404).json({ status: 'error', message: 'Rota não encontrada.' });
   });
