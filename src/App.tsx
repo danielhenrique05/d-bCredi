@@ -15,11 +15,13 @@ import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
 import Avaliacoes from './components/Avaliacoes';
 import Localizacao from './components/Localizacao';
 import AgendamentoAtendimento from './components/AgendamentoAtendimento';
+import ChamadaSimulador from './components/ChamadaSimulador';
 import NossasSolucoes from './components/nossassolucoes';
 import AdminDashboardHome from './admin/AdminDashboardHome';
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
+const SimuladorConsorcio = lazy(() => import('./components/SimuladorConsorcio'));
 
 const PublicSite = () => {
   const location = useLocation();
@@ -47,6 +49,7 @@ const PublicSite = () => {
           <>
             <Hero onSectionChange={handleSectionChange} />
             <NossasSolucoes onSectionChange={handleSectionChange} />
+            <ChamadaSimulador />
             <Avaliacoes />
             <AgendamentoAtendimento />
             <Localizacao />
@@ -94,6 +97,7 @@ function App() {
     >
       <Routes>
         <Route path="/" element={<PublicSite />} />
+        <Route path="/simulador-consorcio" element={<SimuladorConsorcio />} />
         
         <Route path="/admin" element={<AdminLogin />} />
         
