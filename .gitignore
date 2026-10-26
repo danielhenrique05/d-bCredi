@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+!.env.example
+
+# Relatórios e mapas privados de inventário; nunca versionar dados reais.
+/.dnb-migration/
