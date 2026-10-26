@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
-    "test": "node --experimental-strip-types --test tests/api/*.test.mjs",
+    "test": "node --experimental-strip-types --test tests/api/*.test.mjs tests/migration/*.test.mjs",
+    "migration:inventory": "node --experimental-strip-types tools/migration/cli.mjs inventory",
+    "migration:dry-run": "node --experimental-strip-types tools/migration/cli.mjs dry-run",
     "lint": "eslint .",
     "preview": "vite preview"
   },

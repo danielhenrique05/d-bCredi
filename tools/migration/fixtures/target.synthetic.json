@@ -1,0 +1,29 @@
+{
+  "kind": "synthetic", "available": true,
+  "users": [{"id": "30000000-0000-4000-8000-000000000001", "ativo": true, "papel": "vendedor"}],
+  "properties": [],
+  "columns": [
+    {"name":"id","type":"uuid","nullable":false,"hasDefault":true},
+    {"name":"user_id","type":"uuid","nullable":true,"hasDefault":false},
+    {"name":"titulo","type":"text","nullable":false,"hasDefault":false},
+    {"name":"tipo","type":"text","nullable":false,"hasDefault":false},
+    {"name":"preco","type":"numeric","nullable":false,"hasDefault":false,"precision":null,"scale":null},
+    {"name":"cidade","type":"text","nullable":false,"hasDefault":false},
+    {"name":"bairro","type":"text","nullable":false,"hasDefault":false},
+    {"name":"quartos","type":"int4","nullable":true,"hasDefault":false},
+    {"name":"banheiros","type":"int4","nullable":true,"hasDefault":false},
+    {"name":"vagas","type":"int4","nullable":true,"hasDefault":false},
+    {"name":"area","type":"numeric","nullable":true,"hasDefault":false,"precision":null,"scale":null},
+    {"name":"descricao","type":"text","nullable":true,"hasDefault":false},
+    {"name":"imagem_url","type":"text","nullable":true,"hasDefault":false},
+    {"name":"imagens","type":"_text","nullable":true,"hasDefault":false},
+    {"name":"destaque","type":"bool","nullable":true,"hasDefault":true},
+    {"name":"criado_em","type":"timestamptz","nullable":false,"hasDefault":true}
+  ],
+  "constraints": [
+    {"type":"p","definition":"PRIMARY KEY (id)"},
+    {"type":"f","definition":"FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE RESTRICT"}
+  ],
+  "indexes": [{"definition":"CREATE UNIQUE INDEX imoveis_pkey ON public.imoveis USING btree (id)"}],
+  "triggers": []
+}

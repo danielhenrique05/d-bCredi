@@ -1,0 +1,8 @@
+{
+  "mappings": [{
+    "supabase_user_id": "20000000-0000-4000-8000-000000000001",
+    "postgres_user_id": "30000000-0000-4000-8000-000000000001",
+    "confirmed": true, "confirmedBy": "fixture-sintetica-sem-identidade-real",
+    "confirmedAt": "2026-10-26T12:00:00Z"
+  }]
+}

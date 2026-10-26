@@ -1,0 +1,13 @@
+{
+  "kind": "synthetic", "available": true, "fullAccessConfirmed": false, "paginationComplete": true,
+  "properties": [{
+    "id": "10000000-0000-4000-8000-000000000001",
+    "user_id": "20000000-0000-4000-8000-000000000001",
+    "titulo": "Imóvel inteiramente sintético", "tipo": "Casa", "preco": "123456.78",
+    "cidade": "Cidade de teste", "bairro": "Bairro de teste", "quartos": 2, "banheiros": 1,
+    "vagas": 1, "area": "80.50", "descricao": "Fixture sem dados da cliente.",
+    "imagem_url": "https://synthetic.supabase.co/storage/v1/object/public/fotos-imoveis/imoveis/a.jpg",
+    "imagens": ["https://synthetic.supabase.co/storage/v1/object/public/fotos-imoveis/imoveis/a.jpg", "https://synthetic.supabase.co/storage/v1/object/public/fotos-imoveis/imoveis/b.jpg"],
+    "destaque": false, "criado_em": "2026-10-26T12:34:56.123456+00:00"
+  }]
+}
