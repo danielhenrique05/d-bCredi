@@ -9,7 +9,6 @@ import Footer from './components/Footer';
 import Imoveis from './components/Imoveis';
 import ImovelDetalhes from './components/ImovelDetalhes';
 import type { Imovel } from './types';
-import AdminCartas from './admin/AdminCartas';
 import AdminImoveis from './admin/AdminImoveis';
 import AdminHistorico from './admin/AdminHistorico';
 import PoliticaDePrivacidade from './components/PoliticaDePrivacidade';
@@ -97,8 +96,6 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path='/admin/dashboard' element={<AdminDashboardHome/>}/>
 
-          <Route path="/admin/cartas" element={<AdminCartas />} />
-          
           <Route path="/admin/imoveis" element={<AdminImoveis />} />
 
           <Route path="/admin/historico" element={<AdminHistorico />} />

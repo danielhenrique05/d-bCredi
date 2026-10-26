@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Loader2, LogOut, ShieldCheck, CreditCard, Building } from 'lucide-react';
+import { LayoutDashboard, Loader2, LogOut, ShieldCheck, Building } from 'lucide-react';
 import {
   Navigate,
   Outlet,
@@ -142,18 +142,6 @@ const AdminLayout = () => {
             >
               <LayoutDashboard className="h-4 w-4" />
               Início
-            </Link>
-
-            <Link
-              to="/admin/cartas"
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all ${
-                location.pathname === "/admin/cartas"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                  : "bg-transparent text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <CreditCard className="h-4 w-4" />
-              Cartas Contempladas
             </Link>
 
             <Link
