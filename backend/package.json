@@ -1,0 +1,41 @@
+{
+  "name": "dnb-credi-api",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "admin:create": "tsx src/cli/create-admin.ts",
+    "admin:reset-password": "tsx src/cli/reset-admin-password.ts",
+    "db:migrate": "tsx src/database/migrate.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "API REST da D&B Credi",
+  "private": true,
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "cookie": "^2.0.1",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@types/emscripten": "^1.41.6",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "type": "module"
+}
