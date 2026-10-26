@@ -10,6 +10,7 @@ import { createApp } from '../src/app.js';
 import type { Database, DatabaseClient } from '../src/database/transaction.js';
 import { hashPassword } from '../src/shared/password.js';
 import type { Usuario } from '../src/modules/usuarios/usuarios.repository.js';
+import type { PublicImovel, ListedImovel } from '../src/modules/imoveis/imoveis.repository.js';
 
 
 export const testPassword = 'Frase exclusiva para testes 2026!';
@@ -59,7 +60,7 @@ export class MemoryDatabase implements Database {
 
 interface Body {
   usuario?: Usuario; usuarios?: Usuario[]; csrfToken?: string; message?: string; status?: string;
-  limit?: number; offset?: number;
+  imovel?: PublicImovel; imoveis?: ListedImovel[]; limit?: number; offset?: number;
 }
 export class Client {
   readonly cookies = new Map<string, string>();
@@ -115,6 +116,9 @@ export async function createTestContext(realDatabase = process.env.DNB_TEST_DATA
   await pg.exec(migration);
   // Reaplicação explícita também é validada.
   await pg.exec(migration);
+  const imoveisMigration = await readFile(new URL('../src/database/migrations/2026102402_imoveis_indices.sql', import.meta.url), 'utf8');
+  await pg.exec(imoveisMigration);
+  await pg.exec(imoveisMigration);
   const server = createApp(db).listen(0, '127.0.0.1');
   await once(server, 'listening');
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
