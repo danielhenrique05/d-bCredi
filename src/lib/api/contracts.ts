@@ -11,6 +11,21 @@ export interface UsuariosResponse { usuarios: UsuarioApi[]; limit: number; offse
 export interface MensagemResponse { message: string }
 export interface LoginInput { email: string; senha: string }
 export interface AlterarSenhaInput { senha_atual: string; nova_senha: string }
+export interface AtualizarPerfilInput { nome: string }
+export type AuthState =
+  | { status: 'unknown' | 'anonymous'; usuario: null }
+  | { status: 'authenticated' | 'password_change_required'; usuario: UsuarioApi };
+export interface PaginacaoUsuariosInput { limit?: number; offset?: number }
+export interface CriarUsuarioInput { nome: string; email: string; senha: string }
+// A API revalida a senha quando o papel efetivamente muda; o cliente a exige
+// sempre que a alteração de papel é solicitada explicitamente.
+export type AtualizarUsuarioInput = { nome?: string; email?: string } & (
+  | { papel?: never; senha_admin?: never }
+  | { papel: UsuarioApi['papel']; senha_admin: string }
+);
+export interface StatusUsuarioInput { ativo: boolean; senha_admin: string }
+export interface ResetPasswordUsuarioInput { nova_senha: string; senha_admin: string }
+export interface ReautenticarAdminInput { senha_admin: string }
 
 export interface ImovelApi {
   id: string; titulo: string; tipo: string;
