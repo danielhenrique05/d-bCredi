@@ -15,10 +15,24 @@ interface CartaContemplada {
 }
 
 const API_URL = '/api/contemplados';
+const VALOR_MINIMO_CREDITO = 10000;
+const VALOR_MAXIMO_CREDITO = 2000000;
 
 const converterMoeda = (valor: string) => Number(
   valor.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
 );
+
+const formatarEntradaMoeda = (valor: string) => {
+  const caracteres = valor.replace(/[^\d,]/g, '');
+  if (!caracteres) return '';
+  
+  const [inteiro, ...fracao] = caracteres.split(',');
+  const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const temCentavos = caracteres.includes(',');
+  const centavos = fracao.join('').slice(0, 2);
+
+  return `R$ ${inteiroFormatado}${temCentavos ? `,${centavos}` : ''}`;
+};
 
 const formatarMoeda = (valor: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
@@ -43,6 +57,7 @@ const CartasContempladas: React.FC = () => {
   // Estados para o filtro de valor (slider)
   const [valorSlider, setValorSlider] = useState<number>(1000000); 
   const [filtroCredito, setFiltroCredito] = useState<number>(1000000); 
+  const [valorTexto, setValorTexto] = useState(formatarMoeda(1000000));
 
   // Estado para o Modal (Janelinha)
   const [cartaSelecionada, setCartaSelecionada] = useState<CartaContemplada | null>(null);
@@ -164,19 +179,43 @@ const CartasContempladas: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-3">
                 <label className="block text-sm font-semibold text-gray-700 uppercase">3. Limite de Crédito</label>
-                <span className="text-blue-700 font-bold bg-blue-50 px-3 py-1 rounded-full text-sm border border-blue-100">
-                  Até {formatarMoeda(valorSlider)}
-                </span>
+                <div className="flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
+                  <span>Até</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    aria-label="Valor máximo do crédito"
+                    value={valorTexto}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onChange={(e) => {
+                      const textoFormatado = formatarEntradaMoeda(e.currentTarget.value);
+                      setValorTexto(textoFormatado);
+
+                      if (/\d/.test(textoFormatado)) {
+                        const valorDigitado = converterMoeda(textoFormatado);
+                        if (Number.isFinite(valorDigitado)) {
+                          setValorSlider(Math.min(VALOR_MAXIMO_CREDITO, Math.max(VALOR_MINIMO_CREDITO, valorDigitado)));
+                        }
+                      }
+                    }}
+                    onBlur={() => setValorTexto(formatarMoeda(valorSlider))}
+                    className="w-36 bg-transparent text-right font-bold outline-none"
+                  />
+                </div>
               </div>
               
               <div className="mt-4 mb-5">
                 <input 
                   type="range" 
-                  min="10000" 
-                  max="2000000" 
+                  min={VALOR_MINIMO_CREDITO}
+                  max={VALOR_MAXIMO_CREDITO}
                   step="5000"
                   value={valorSlider}
-                  onChange={(e) => setValorSlider(Number(e.target.value))}
+                  onChange={(e) => {
+                    const novoValor = Number(e.target.value);
+                    setValorSlider(novoValor);
+                    setValorTexto(formatarMoeda(novoValor));
+                  }}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
               </div>

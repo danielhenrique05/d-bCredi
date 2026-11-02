@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Edit2, Image as ImageIcon, Loader2, MapPin, Plus, Star, Trash2, X } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase';
+import { converterMoeda, formatarEntradaMoeda, formatarMoeda } from '../lib/moeda';
 import type { Imovel } from '../types';
 import { obterUsuarioAtual, type UsuarioAtual } from '../services/usuarios';
 
@@ -43,9 +44,6 @@ const numero = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatarMoeda = (valor: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-
 const AdminImoveis = () => {
   const usuarioPainel = useOutletContext<UsuarioAtual>();
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
@@ -54,6 +52,7 @@ const AdminImoveis = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<ImovelFormData>(criarFormData);
+  const [precoTexto, setPrecoTexto] = useState('');
 
   const carregarImoveis = useCallback(async () => {
     setLoading(true);
@@ -96,6 +95,7 @@ const AdminImoveis = () => {
   const handleNovo = () => {
     setImovelEditando(null);
     setFormData(criarFormData());
+    setPrecoTexto('');
     setIsModalOpen(true);
   };
 
@@ -115,6 +115,7 @@ const AdminImoveis = () => {
       destaque: imovel.destaque,
       imagens: imovel.imagens,
     });
+    setPrecoTexto(formatarMoeda(imovel.preco));
     setIsModalOpen(true);
   };
 
@@ -346,7 +347,24 @@ const AdminImoveis = () => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <label className="block md:col-span-2"><span className="mb-1 block text-sm font-semibold text-gray-700">Titulo do Anuncio</span><input type="text" required value={formData.titulo} onChange={(event) => setFormData((current) => ({ ...current, titulo: event.target.value }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600" /></label>
                   <label className="block"><span className="mb-1 block text-sm font-semibold text-gray-700">Tipo</span><select value={formData.tipo} onChange={(event) => setFormData((current) => ({ ...current, tipo: event.target.value }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600"><option value="Casa">Casa</option><option value="Apartamento">Apartamento</option><option value="Terreno">Terreno</option><option value="Comercial">Comercial</option></select></label>
-                  <label className="block"><span className="mb-1 block text-sm font-semibold text-gray-700">Preco de Venda (R$)</span><input type="number" required min="0" step="0.01" value={formData.preco || ''} onChange={(event) => setFormData((current) => ({ ...current, preco: numero(event.target.value) }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600" /></label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-semibold text-gray-700">Preco de Venda (R$)</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      value={precoTexto}
+                      onFocus={(event) => event.currentTarget.select()}
+                      onChange={(event) => {
+                        const textoFormatado = formatarEntradaMoeda(event.currentTarget.value);
+                        setPrecoTexto(textoFormatado);
+                        setFormData((current) => ({ ...current, preco: converterMoeda(textoFormatado) }));
+                      }}
+                      onBlur={() => setPrecoTexto(formatarMoeda(formData.preco))}
+                      placeholder="R$ 0,00"
+                      className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </label>
                   <label className="block"><span className="mb-1 block text-sm font-semibold text-gray-700">Cidade</span><input type="text" required value={formData.cidade} onChange={(event) => setFormData((current) => ({ ...current, cidade: event.target.value }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600" /></label>
                   <label className="block"><span className="mb-1 block text-sm font-semibold text-gray-700">Bairro</span><input type="text" required value={formData.bairro} onChange={(event) => setFormData((current) => ({ ...current, bairro: event.target.value }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600" /></label>
                   <label className="block"><span className="mb-1 block text-sm font-semibold text-gray-700">Quartos</span><input type="number" min="0" value={formData.quartos} onChange={(event) => setFormData((current) => ({ ...current, quartos: numero(event.target.value) }))} className="w-full rounded-lg border border-gray-300 p-2.5 outline-none focus:ring-2 focus:ring-blue-600" /></label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Home, Car, CheckCircle, Info, Loader2 } from 'lucide-react';
 import { getSupabaseClient } from '../lib/supabase';
+import { converterMoeda, formatarEntradaMoeda, formatarMoeda } from '../lib/moeda';
 
 const supabase = getSupabaseClient()
 
@@ -17,15 +18,14 @@ interface Carta {
   status: 'disponivel' | 'reservado';
 }
 
-const formatarMoeda = (valor: number) => {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-};
-
 const AdminCartas = () => {
   const [cartas, setCartas] = useState<Carta[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cartaEditando, setCartaEditando] = useState<Carta | null>(null);
   const [loading, setLoading] = useState(false);
+  const [creditoTexto, setCreditoTexto] = useState('');
+  const [entradaTexto, setEntradaTexto] = useState('');
+  const [valorParcelaTexto, setValorParcelaTexto] = useState('');
 
   // Estados do Formulário
   const [formData, setFormData] = useState<Omit<Carta, 'id'>>({
@@ -84,6 +84,9 @@ const AdminCartas = () => {
       admin: '',
       status: 'disponivel'
     });
+    setCreditoTexto('');
+    setEntradaTexto('');
+    setValorParcelaTexto('');
     setIsModalOpen(true);
   };
 
@@ -100,6 +103,9 @@ const AdminCartas = () => {
       admin: carta.admin,
       status: carta.status
     });
+    setCreditoTexto(formatarMoeda(carta.credito));
+    setEntradaTexto(formatarMoeda(carta.entrada));
+    setValorParcelaTexto(formatarMoeda(carta.valorParcela));
     setIsModalOpen(true);
   };
 
@@ -325,9 +331,16 @@ const AdminCartas = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Valor do Crédito (R$)</label>
                     <input 
-                      type="number" required min="0" step="0.01"
-                      value={formData.credito || ''}
-                      onChange={(e) => setFormData({...formData, credito: Number(e.target.value)})}
+                      type="text" inputMode="decimal" required
+                      value={creditoTexto}
+                      placeholder="R$ 0,00"
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const texto = formatarEntradaMoeda(e.target.value);
+                        setCreditoTexto(texto);
+                        setFormData({...formData, credito: converterMoeda(texto)});
+                      }}
+                      onBlur={() => setCreditoTexto(formatarMoeda(formData.credito))}
                       className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </div>
@@ -336,9 +349,16 @@ const AdminCartas = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Valor da Entrada (R$)</label>
                     <input 
-                      type="number" required min="0" step="0.01"
-                      value={formData.entrada || ''}
-                      onChange={(e) => setFormData({...formData, entrada: Number(e.target.value)})}
+                      type="text" inputMode="decimal" required
+                      value={entradaTexto}
+                      placeholder="R$ 0,00"
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const texto = formatarEntradaMoeda(e.target.value);
+                        setEntradaTexto(texto);
+                        setFormData({...formData, entrada: converterMoeda(texto)});
+                      }}
+                      onBlur={() => setEntradaTexto(formatarMoeda(formData.entrada))}
                       className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </div>
@@ -358,9 +378,16 @@ const AdminCartas = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Valor da Parcela (R$)</label>
                     <input 
-                      type="number" required min="0" step="0.01"
-                      value={formData.valorParcela || ''}
-                      onChange={(e) => setFormData({...formData, valorParcela: Number(e.target.value)})}
+                      type="text" inputMode="decimal" required
+                      value={valorParcelaTexto}
+                      placeholder="R$ 0,00"
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const texto = formatarEntradaMoeda(e.target.value);
+                        setValorParcelaTexto(texto);
+                        setFormData({...formData, valorParcela: converterMoeda(texto)});
+                      }}
+                      onBlur={() => setValorParcelaTexto(formatarMoeda(formData.valorParcela))}
                       className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </div>
